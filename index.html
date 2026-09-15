@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymApp Pro - Dynamic Auto-Overload Edition</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --accent: #f59e0b;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --card-inner: #334155;
+            --text: #f8fafc;
+            --text-light: #94a3b8;
+            --border: #475569;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --purple: #a855f7;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            padding-bottom: 140px;
+        }
+        header {
+            background: linear-gradient(135deg, #1e1b4b, #1e40af);
+            color: white;
+            padding: 1.2rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 1.25rem;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+        }
+        h2, h3 { margin-top: 0; color: #60a5fa; }
+
+        button, .btn-upload {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 700;
+            transition: all 0.2s;
+            display: inline-block;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        button:hover, .btn-upload:hover { background-color: var(--primary-dark); transform: translateY(-1px); }
+        button:disabled { background-color: #475569; cursor: not-allowed; opacity: 0.6; }
+        button.secondary { background-color: #475569; }
+        button.secondary:hover { background-color: #334155; }
+        button.success { background-color: var(--success); }
+        button.warning { background-color: var(--danger); }
+        
+        .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.85rem;
+            width: auto;
+            border-radius: 6px;
+        }
+
+        .status-banner {
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+            color: white;
+            padding: 1.25rem;
+            border-radius: 14px;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+        }
+        .status-banner h3 {
+            color: #bfdbfe;
+            margin: 0 0 0.25rem 0;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .status-banner .session-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .cycle-evo-card {
+            background: linear-gradient(135deg, #311b92, #4a148c);
+            border: 1px solid #7e22ce;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.2rem;
+        }
+
+        .trainer-tip-box {
+            background: #1e1b4b;
+            border-left: 4px solid var(--accent);
+            padding: 0.85rem;
+            border-radius: 8px;
+            margin-top: 0.75rem;
+            font-size: 0.88rem;
+            color: #f1f5f9;
+        }
+        .trainer-tip-title {
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 0.25rem;
+        }
+
+        .exercise-box {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.1rem;
+            margin-bottom: 1.2rem;
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--primary);
+        }
+        .exercise-box.superset {
+            border-left: 5px solid var(--purple);
+            background: #1e1e38;
+        }
+        .exercise-box.disabled-box { opacity: 0.65; }
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .exercise-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #f8fafc;
+        }
+        .exercise-meta {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 0.6rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .meta-pill {
+            background: var(--card-inner);
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            color: #e2e8f0;
+        }
+        .meta-pill.evo-pill {
+            background: #581c87;
+            color: #f3e8ff;
+            border-color: #9333ea;
+            font-weight: bold;
+        }
+        .meta-pill.target-pill {
+            background: #0284c7;
+            color: #e0f2fe;
+            border-color: #38bdf8;
+            font-weight: bold;
+        }
+
+        .tech-guide {
+            display: none;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 0.85rem;
+        }
+        .tech-guide.show { display: block; }
+
+        .tech-steps {
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            margin: 0;
+            padding-left: 1.2rem;
+            line-height: 1.4;
+        }
+
+        .series-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .series-row label { flex: 1; color: #cbd5e1; font-weight: 500; }
+        .series-row input {
+            width: 75px;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            background: #0f172a;
+            color: white;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .feedback-badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+        }
+        .badge-promoted { background: #15803d; color: #dcfce7; }
+        .badge-maintained { background: #854d0e; color: #fef08a; }
+        .badge-deload { background: #991b1b; color: #fee2e2; }
+
+        #timer-bar {
+            display: none;
+            position: fixed;
+            bottom: 60px;
+            left: 0;
+            width: 100%;
+            background: #020617;
+            color: white;
+            padding: 0.85rem 1rem;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.6);
+            z-index: 900;
+            border-top: 2px solid var(--primary);
+            box-sizing: border-box;
+        }
+        .timer-container {
+            max-width: 650px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .timer-display {
+            font-size: 1.7rem;
+            font-weight: bold;
+            font-family: monospace;
+            color: #38bdf8;
+        }
+
+        nav {
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            background: #1e293b;
+            display: flex;
+            border-top: 1px solid var(--border);
+            z-index: 950;
+        }
+        nav button {
+            background: none;
+            color: var(--text-light);
+            border-radius: 0;
+            padding: 0.85rem;
+            flex: 1;
+            font-size: 0.85rem;
+        }
+        nav button.active {
+            color: #60a5fa;
+            font-weight: bold;
+            border-top: 3px solid var(--primary);
+            background: #0f172a;
+        }
+        .view { display: none; }
+        .view.active { display: block; }
+        .badge {
+            background: #1e3a8a;
+            color: #93c5fd;
+            padding: 0.25rem 0.55rem;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: bold;
+        }
+        .history-item { 
+            border-left: 4px solid var(--primary); 
+            padding: 1rem; 
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 style="margin:0; font-size:1.4rem;">🏋️ GymApp Pro</h1>
+        <p id="cycle-info" style="margin:0.25rem 0 0 0; font-size:0.85rem; color:#93c5fd;">Cargando motor de sobrecarga...</p>
+    </header>
+
+    <div class="container">
+        <!-- VISTA 1: ENTRENAMIENTO -->
+        <div id="view-workout" class="view active">
+            <div id="workout-content"></div>
+        </div>
+
+        <!-- VISTA 2: HISTORIAL -->
+        <div id="view-history" class="view">
+            <h2>Historial y Evaluación Automática</h2>
+            <div id="history-content"></div>
+        </div>
+
+        <!-- VISTA 3: AJUSTES & CICLOS -->
+        <div id="view-settings" class="view">
+            <h2>Configuración e Inteligencia del Entrenador</h2>
+            
+            <div class="card">
+                <h3>Avanzar de Ciclo Manualmente</h3>
+                <p style="font-size:0.85rem; color:var(--text-light);">
+                    Procesa todas las reps y pesos de las 6 semanas pasadas para ajustar la base del nuevo ciclo.
+                </p>
+                <button onclick="forceCycleEvolution()" class="secondary" style="background:#6b21a8;">🚀 Forzar / Recalcular Siguiente Ciclo</button>
+            </div>
+
+            <div class="card">
+                <h3>Fecha de Inicio del Programa</h3>
+                <input type="date" id="cycle-start-date" style="padding:0.6rem; font-size:1rem; width:100%; box-sizing:border-box; background:#0f172a; color:white; border:1px solid var(--border); border-radius:8px;" onchange="updateStartDate(this.value)">
+            </div>
+
+            <div class="card">
+                <h3>Copia de Seguridad (Backup)</h3>
+                <div style="display:flex; flex-direction:column; gap:0.6rem;">
+                    <button class="secondary" onclick="exportBackup()">📥 Descargar Backup (.json)</button>
+                    <label class="btn-upload">
+                        📤 Restaurar Backup (.json)
+                        <input type="file" id="import-file" accept=".json" onchange="importBackup(event)" style="display:none;">
+                    </label>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Reset de Datos</h3>
+                <button class="warning" onclick="resetApp()">⚠️ Borrar Todo y Reiniciar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CRONÓMETRO FLOTANTE -->
+    <div id="timer-bar">
+        <div class="timer-container">
+            <div>
+                <small id="timer-label" style="color:#94a3b8; display:block; font-size:0.8rem;">Descanso Recomendado</small>
+                <span id="timer-count" class="timer-display">00:00</span>
+            </div>
+            <div style="display:flex; gap:0.4rem;">
+                <button class="btn-sm secondary" onclick="addTimerSeconds(30)">+30s</button>
+                <button class="btn-sm warning" onclick="stopRestTimer()">Saltar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVEGACIÓN -->
+    <nav>
+        <button id="nav-workout" class="active" onclick="switchView('workout')">🏋️ Entreno</button>
+        <button id="nav-history" onclick="switchView('history')">📊 Historial</button>
+        <button id="nav-settings" onclick="switchView('settings')">⚙️ Ajustes</button>
+    </nav>
+
+    <script>
+        // MATRIZ DE EVOLUCIÓN DE EJERCICIOS POR PATRÓN DE MOVIMIENTO
+        const exerciseEvolutionTree = {
+            empuje_plano: [
+                { id: 'press_banca', name: 'Press de Banca Plano con Barra', muscle: 'Pectoral Mayor', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 150, baseWeight: 50, tempo: '3-0-1-0', steps: ['Retrae escápulas.', 'Baja la barra al esternón.', 'Empuja explosivo.'] },
+                { id: 'press_banca_manc', name: 'Press Plano con Mancuernas Pesadas', muscle: 'Pectoral Mayor', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 150, baseWeight: 22, tempo: '3-1-1-0', steps: ['Mayor rango de movimiento.', 'Desciende sintiendo el estiramiento.', 'Junta mancuernas arriba.'] },
+                { id: 'press_inclinado_barra', name: 'Press Inclinado con Barra Olimpia', muscle: 'Pectoral Superior', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 150, baseWeight: 52.5, tempo: '3-0-1-0', steps: ['Banco a 30 grados.', 'Baja a la parte alta del pecho.'] }
+            ],
+            empuje_inclinado: [
+                { id: 'press_inc_manc', name: 'Press Inclinado con Mancuernas', muscle: 'Pecho Superior', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 120, baseWeight: 18, tempo: '2-1-1-0', steps: ['Apertura a 45°.', 'Mantén codos alineados.'] },
+                { id: 'fondos_pecho', name: 'Fondos en Paralelas con Lastre', muscle: 'Pecho Inferior / Tríceps', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 120, baseWeight: 5, tempo: '3-0-1-0', steps: ['Inclina el torso ligeramente adelante.', 'Baja hasta 90° de codo.'] }
+            ],
+            pecho_aislado: [
+                { id: 'cruces_polea', name: 'Cruces de Polea Alta / Media', muscle: 'Pectoral (Aislamiento)', series: 3, minReps: 10, maxReps: 12, targetReps: '10-12 reps', defaultRest: 75, baseWeight: 15, tempo: '2-0-1-1', steps: ['Flexión ligera de codo.', 'Aprieta 1s en el centro.'] },
+                { id: 'peck_deck', name: 'Contractora / Peck Deck', muscle: 'Pectoral Medio', series: 3, minReps: 12, maxReps: 15, targetReps: '12-15 reps', defaultRest: 75, baseWeight: 40, tempo: '2-1-1-1', steps: ['Codos a la altura del pecho.', 'Junta sin perder tensión.'] }
+            ],
+            triceps_principal: [
+                { id: 'triceps_polea', name: 'Extensión Tríceps en Polea Cuerda', muscle: 'Tríceps (Lateral)', series: 4, minReps: 10, maxReps: 12, targetReps: '10-12 reps', defaultRest: 60, isSuperset: true, baseWeight: 20, tempo: '2-0-1-0', steps: ['Codos inmóviles.', 'Abre la cuerda al final.'] },
+                { id: 'press_frances', name: 'Press Francés con Barra Z', muscle: 'Tríceps (Global)', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 90, isSuperset: false, baseWeight: 22.5, tempo: '3-0-1-0', steps: ['Baja la barra hacia la frente.', 'Codos cerrados.'] }
+            ],
+            triceps_accesorio: [
+                { id: 'triceps_nuca', name: 'Extensión Tras Nuca en Polea', muscle: 'Tríceps (Cabeza Larga)', series: 3, minReps: 12, maxReps: 15, targetReps: '12-15 reps', defaultRest: 60, isSuperset: true, baseWeight: 12, tempo: '3-0-1-0', steps: ['Estiramiento completo tras la cabeza.'] }
+            ],
+            tiron_vertical: [
+                { id: 'jalon_pecho', name: 'Jalón al Pecho en Polea', muscle: 'Dorsal Ancho', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 120, baseWeight: 45, tempo: '3-0-1-0', steps: ['Tira sacando pecho.', 'Lleva la barra a la clavícula.'] },
+                { id: 'dominadas', name: 'Dominadas Pronas Asistidas/Lastradas', muscle: 'Dorsal Ancho', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 150, baseWeight: 0, tempo: '3-0-1-0', steps: ['Rango completo colgado.', 'Barbilla sobre barra.'] }
+            ],
+            tiron_horizontal: [
+                { id: 'remo_gironda', name: 'Remo Sentado en Polea (Gironda)', muscle: 'Espalda Media / Trapecio', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 105, baseWeight: 40, tempo: '2-1-1-0', steps: ['Tracciona directo al ombligo.', 'Junta escápulas.'] },
+                { id: 'remo_barra', name: 'Remo con Barra 90° / Pendlay', muscle: 'Grosor de Espalda', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 130, baseWeight: 45, tempo: '2-0-1-0', steps: ['Espalda paralela al suelo.', 'Tira al abdomen.'] }
+            ],
+            cuadriceps_principal: [
+                { id: 'sentadilla', name: 'Sentadilla Trasera con Barra', muscle: 'Cuádriceps / Glúteo', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 180, baseWeight: 60, tempo: '3-1-1-0', steps: ['Pies ancho de hombros.', 'Rompe los 90° en profundidad.'] },
+                { id: 'prensa_piernas', name: 'Prensa de Piernas 45° Inclinada', muscle: 'Cuádriceps Global', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 150, baseWeight: 110, tempo: '3-0-1-0', steps: ['Baja profundo sin levantar cadera.'] }
+            ],
+            isquios_principal: [
+                { id: 'peso_muerto_rum', name: 'Peso Muerto Rumano', muscle: 'Isquios / Glúteo', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 120, baseWeight: 50, tempo: '3-1-1-0', steps: ['Cadera hacia atrás.', 'Barra pegada a piernas.'] },
+                { id: 'curl_femoral', name: 'Curl Femoral Tumbado', muscle: 'Isquios Aislamiento', series: 4, minReps: 10, maxReps: 12, targetReps: '10-12 reps', defaultRest: 90, baseWeight: 35, tempo: '2-1-1-0', steps: ['Contracción fuerte en la flexión.'] }
+            ]
+        };
+
+        const rutinaBaseStructure = {
+            'A': { name: 'Sesión A: Empuje (Pecho + Tríceps)', focus: 'Hipertrofia Torso Anterior', slots: ['empuje_plano', 'empuje_inclinado', 'pecho_aislado', 'triceps_principal', 'triceps_accesorio'] },
+            'B': { name: 'Sesión B: Tirón (Espalda + Bíceps)', focus: 'Amplitud y Grosor Dorsal', slots: ['tiron_vertical', 'tiron_horizontal', 'pecho_aislado', 'triceps_principal', 'triceps_accesorio'] },
+            'C': { name: 'Sesión C: Tren Inferior (Pierna)', focus: 'Fuerza e Hipertrofia de Pierna', slots: ['cuadriceps_principal', 'isquios_principal', 'empuje_inclinado', 'triceps_principal', 'triceps_accesorio'] },
+            'D': { name: 'Sesión D: Hombro & Core', focus: 'Deltoides 3D y Estabilidad', slots: ['empuje_inclinado', 'pecho_aislado', 'tiron_horizontal', 'triceps_principal', 'triceps_accesorio'] }
+        };
+
+        const rotationOrder = ['A', 'B', 'C', 'D'];
+
+        // ESTADO GLOBAL
+        let appState = JSON.parse(localStorage.getItem('gymApp_adaptive_v3')) || {
+            startDate: new Date().toISOString().split('T')[0],
+            history: [],
+            cycleNumber: 1,
+            cycleCalculatedWeights: {}, 
+            workoutStarted: false,
+            activeDay: null,
+            draftInputs: {}
+        };
+
+        function saveState() {
+            localStorage.setItem('gymApp_adaptive_v3', JSON.stringify(appState));
+        }
+
+        function getNaturalWeekAndCycle() {
+            const startParts = appState.startDate.split('-');
+            const start = new Date(startParts[0], startParts[1] - 1, startParts[2]);
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            const diffMs = today - start;
+            const diffDays = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+
+            const cycle = Math.floor(diffDays / 42) + 1; 
+            const dayInCycle = diffDays % 42;
+            const week = Math.floor(dayInCycle / 7) + 1;
+
+            return { week: Math.min(week, 6), cycle };
+        }
+
+        // CÁLCULO DEL PESO AJUSTADO DINÁMICAMENTE SEGÚN RANGO DE REPETICIONES COMPLETADO
+        function calculateEvolvedWeightForExercise(exTemplate) {
+            if (appState.cycleCalculatedWeights && appState.cycleCalculatedWeights[exTemplate.id] !== undefined) {
+                return appState.cycleCalculatedWeights[exTemplate.id];
+            }
+            return exTemplate.baseWeight;
+        }
+
+        function getEvolvedWorkoutForCycle(dayTab, currentCycle) {
+            const dayStructure = rutinaBaseStructure[dayTab];
+            const exercises = [];
+
+            dayStructure.slots.forEach((slotKey) => {
+                const evolutionOptions = exerciseEvolutionTree[slotKey] || exerciseEvolutionTree['empuje_plano'];
+                const evoIndex = (currentCycle - 1) % evolutionOptions.length;
+                let templateEx = { ...evolutionOptions[evoIndex] };
+
+                templateEx.calculatedBaseWeight = calculateEvolvedWeightForExercise(templateEx);
+                exercises.push(templateEx);
+            });
+
+            return {
+                name: dayStructure.name,
+                focus: dayStructure.focus,
+                exercises: exercises
+            };
+        }
+
+        // EVALUACIÓN TRAS REGISTRAR UN ENTRENO:
+        // Ajusta automáticamente el peso para la próxima aparición del ejercicio según reps logradas
+        function evaluateWorkoutPerformance(workoutRecord) {
+            workoutRecord.exercises.forEach(recordedEx => {
+                // Buscar template
+                let matchedTemplate = null;
+                Object.keys(exerciseEvolutionTree).forEach(slotKey => {
+                    exerciseEvolutionTree[slotKey].forEach(ex => {
+                        if (ex.name === recordedEx.name) matchedTemplate = ex;
+                    });
+                });
+
+                if (!matchedTemplate) return;
+
+                const minR = matchedTemplate.minReps || 6;
+                const maxR = matchedTemplate.maxReps || 8;
+
+                let validSeries = recordedEx.series.filter(s => s.reps > 0 && s.weight > 0);
+                if (validSeries.length === 0) return;
+
+                let totalReps = 0;
+                let maxWeightUsed = 0;
+                validSeries.forEach(s => {
+                    totalReps += s.reps;
+                    if (s.weight > maxWeightUsed) maxWeightUsed = s.weight;
+                });
+
+                let avgReps = totalReps / validSeries.length;
+                let currentWeight = appState.cycleCalculatedWeights[matchedTemplate.id] || maxWeightUsed || matchedTemplate.baseWeight;
+
+                // REGLAS DE AJUSTE AUTOMÁTICO DE SOBRECARGA:
+                if (avgReps >= maxR) {
+                    // Cumplió o superó el objetivo superior -> Incrementar peso
+                    let increment = (matchedTemplate.muscle.includes('Pectoral') || matchedTemplate.muscle.includes('Dorsal') || matchedTemplate.muscle.includes('Cuádriceps') || matchedTemplate.muscle.includes('Glúteo')) ? 2.5 : 1.25;
+                    let newWeight = Math.round((currentWeight + increment) * 2) / 2;
+                    appState.cycleCalculatedWeights[matchedTemplate.id] = newWeight;
+                    recordedEx.evaluation = { status: 'PROMOTED', text: `🎯 ¡Objetivo superado! Peso aumentado a ${newWeight} kg (+${increment}kg)`, badgeClass: 'badge-promoted' };
+                } else if (avgReps >= minR) {
+                    // Cumplió dentro del rango -> Mantener peso
+                    appState.cycleCalculatedWeights[matchedTemplate.id] = currentWeight;
+                    recordedEx.evaluation = { status: 'MAINTAINED', text: `👍 Objetivo alcanzado. Mantienes ${currentWeight} kg para afianzar repeticiones.`, badgeClass: 'badge-maintained' };
+                } else {
+                    // Quedó por debajo del rango mínimo -> Ligera descarga o mantener para recuperar
+                    let newWeight = Math.max(0, Math.round((currentWeight * 0.95) * 2) / 2);
+                    appState.cycleCalculatedWeights[matchedTemplate.id] = newWeight;
+                    recordedEx.evaluation = { status: 'DELOAD', text: `⚠️ Por debajo de repeticiones objetivo. Peso ajustado a ${newWeight} kg para optimizar técnica.`, badgeClass: 'badge-deload' };
+                }
+            });
+        }
+
+        function forceCycleEvolution() {
+            appState.cycleNumber += 1;
+            saveState();
+            alert(`🚀 ¡Ciclo ${appState.cycleNumber} activado! Se renovaron variantes de ejercicios y recalcularon pesos base.`);
+            renderWorkout();
+        }
+
+        function exportBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `gymApp_autoprogress_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(dlAnchorElem);
+            dlAnchorElem.click();
+            dlAnchorElem.remove();
+        }
+
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedState = JSON.parse(e.target.result);
+                    if (importedState && typeof importedState === 'object') {
+                        if (confirm("¿Restaurar copia de seguridad?")) {
+                            appState = importedState;
+                            saveState();
+                            alert("✅ Backup cargado.");
+                            location.reload();
+                        }
+                    }
+                } catch (err) { alert("❌ Error en archivo JSON."); }
+            };
+            reader.readAsText(file);
+        }
+
+        function getAutoNextDay() {
+            if (!appState.history || appState.history.length === 0) return 'A';
+            const lastWorkout = appState.history[0];
+            const lastTab = lastWorkout.dayTab || 'A';
+            const currentIndex = rotationOrder.indexOf(lastTab);
+            if (currentIndex === -1) return 'A';
+            return rotationOrder[(currentIndex + 1) % rotationOrder.length];
+        }
+
+        function startWorkout() {
+            appState.workoutStarted = true;
+            appState.activeDay = getAutoNextDay();
+            saveState();
+            renderWorkout();
+        }
+
+        function cancelWorkout() {
+            if(confirm("¿Cancelar entrenamiento en curso?")) {
+                appState.workoutStarted = false;
+                appState.activeDay = null;
+                appState.draftInputs = {};
+                saveState();
+                renderWorkout();
+            }
+        }
+
+        function updateDraft(key, val) {
+            appState.draftInputs[key] = val;
+            saveState();
+        }
+
+        function toggleTech(id) {
+            const el = document.getElementById(`tech-${id}`);
+            if(el) el.classList.toggle('show');
+        }
+
+        function renderWorkout() {
+            const container = document.getElementById('workout-content');
+            const { week, cycle: naturalCycle } = getNaturalWeekAndCycle();
+            const currentCycle = Math.max(naturalCycle, appState.cycleNumber);
+            
+            const currentDayTab = appState.workoutStarted ? (appState.activeDay || getAutoNextDay()) : getAutoNextDay();
+            const rutinaObj = getEvolvedWorkoutForCycle(currentDayTab, currentCycle);
+
+            document.getElementById('cycle-info').innerText = `Ciclo ${currentCycle} • Semana ${week} de 6`;
+            if(document.getElementById('cycle-start-date')) {
+                document.getElementById('cycle-start-date').value = appState.startDate;
+            }
+
+            const isStarted = appState.workoutStarted;
+
+            let html = `
+                <div class="status-banner">
+                    <h3>🎯 Sesión Adaptativa Asignada</h3>
+                    <div class="session-title">${rutinaObj.name}</div>
+                    <div style="font-size:0.88rem; opacity:0.95; margin-top:0.3rem;">Foco: ${rutinaObj.focus}</div>
+                </div>
+
+                <div class="cycle-evo-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="color:#e9d5ff; font-weight:bold; font-size:0.9rem;">🤖 Motor Rep-Target de Progresión</span>
+                        <span class="badge" style="background:#581c87; color:#f3e8ff;">${week === 6 ? 'DESCARGA (60% Carga)' : 'FASE DE CARGA'}</span>
+                    </div>
+                    <p style="margin:0.4rem 0 0 0; font-size:0.8rem; color:#cbd5e1;">
+                        Si cumples las reps máximas objetivo con el peso asignado, la app subirá automáticamente el peso para tu siguiente sesión.
+                    </p>
+                </div>
+            `;
+
+            if (!isStarted) {
+                html += `
+                    <div class="card" style="background:#1e3a8a; border-color:#3b82f6; text-align:center;">
+                        <button onclick="startWorkout()" class="success" style="font-size:1.1rem; padding:0.95rem;">▶️ Comenzar Entrenamiento ${currentDayTab}</button>
+                    </div>`;
+            } else {
+                html += `
+                    <div class="card" style="display:flex; justify-content:space-between; align-items:center; background:#450a0a; border-color:#ef4444;">
+                        <span style="color:#fca5a5; font-size:0.88rem; font-weight:bold;">🔴 SESIÓN ${currentDayTab} EN CURSO</span>
+                        <button onclick="cancelWorkout()" class="btn-sm warning">Cancelar</button>
+                    </div>`;
+            }
+
+            rutinaObj.exercises.forEach((ex, index) => {
+                let currentBaseW = ex.calculatedBaseWeight;
+                if(week === 6) currentBaseW = Math.round((currentBaseW * 0.6) * 2) / 2;
+
+                const isSs = ex.isSuperset;
+
+                html += `
+                    <div class="exercise-box ${isSs ? 'superset' : ''} ${!isStarted ? 'disabled-box' : ''}">
+                        <div class="exercise-header">
+                            <div>
+                                <span class="exercise-title">${index + 1}. ${ex.name}</span>
+                                <div style="font-size:0.83rem; color:var(--text-light); margin-top:0.1rem;">Anatomía: <strong style="color:#60a5fa;">${ex.muscle}</strong></div>
+                            </div>
+                            <button class="btn-sm secondary" onclick="toggleTech('${ex.id}')">📐 Guía & Técnica</button>
+                        </div>
+
+                        <div id="tech-${ex.id}" class="tech-guide">
+                            <div class="trainer-tip-box">
+                                <div class="trainer-tip-title">⚡ Cadencia / Tempo: ${ex.tempo}</div>
+                                <ul class="tech-steps">
+                                    ${ex.steps.map(s => `<li>${s}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="exercise-meta">
+                            <span class="meta-pill target-pill">🎯 Objetivo: ${ex.targetReps}</span>
+                            <span class="meta-pill evo-pill">⚖️ Carga Recomendada: ${currentBaseW} kg</span>
+                            <button class="btn-sm" style="background:#0284c7;" onclick="startRestTimer(${ex.defaultRest}, '${ex.name}')" ${!isStarted ? 'disabled' : ''}>⏱️ Timer (${ex.defaultRest}s)</button>
+                        </div>
+
+                        <div style="margin-top: 0.85rem;">
+                `;
+
+                for(let s = 1; s <= ex.series; s++) {
+                    let wKey = `${currentDayTab}-w-${ex.id}-s${s}`;
+                    let rKey = `${currentDayTab}-r-${ex.id}-s${s}`;
+
+                    let valW = appState.draftInputs[wKey] !== undefined ? appState.draftInputs[wKey] : (isStarted ? currentBaseW : '');
+                    let valR = appState.draftInputs[rKey] !== undefined ? appState.draftInputs[rKey] : '';
+
+                    html += `
+                        <div class="series-row">
+                            <label>Serie ${s}</label>
+                            <input type="number" step="0.5" placeholder="Kg" value="${valW}" ${!isStarted ? 'disabled' : ''} oninput="updateDraft('${wKey}', this.value)">
+                            <span style="color:#94a3b8; font-size:0.8rem;">kg</span>
+                            <input type="number" placeholder="Reps" value="${valR}" ${!isStarted ? 'disabled' : ''} oninput="updateDraft('${rKey}', this.value)">
+                            <span style="color:#94a3b8; font-size:0.8rem;">reps</span>
+                        </div>
+                    `;
+                }
+                html += `</div></div>`;
+            });
+
+            if (isStarted) {
+                html += `
+                    <button class="success" onclick="finishWorkout('${currentDayTab}')" style="font-size:1.1rem; padding:1.1rem; margin-top:1rem; box-shadow:0 4px 14px rgba(34,197,94,0.4);">
+                        ✅ Finalizar, Evaluar Reps y Ajustar Progresión
+                    </button>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function finishWorkout(currentDayTab) {
+            const { week, cycle: naturalCycle } = getNaturalWeekAndCycle();
+            const currentCycle = Math.max(naturalCycle, appState.cycleNumber);
+            const rutinaObj = getEvolvedWorkoutForCycle(currentDayTab, currentCycle);
+
+            let workoutRecord = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                dayTab: currentDayTab,
+                title: rutinaObj.name,
+                cycle: currentCycle,
+                week: week,
+                exercises: []
+            };
+
+            rutinaObj.exercises.forEach(ex => {
+                let exerciseData = { name: ex.name, muscle: ex.muscle, series: [] };
+
+                for(let s = 1; s <= ex.series; s++) {
+                    let wKey = `${currentDayTab}-w-${ex.id}-s${s}`;
+                    let rKey = `${currentDayTab}-r-${ex.id}-s${s}`;
+                    
+                    let w = appState.draftInputs[wKey] || 0;
+                    let r = appState.draftInputs[rKey] || 0;
+
+                    exerciseData.series.push({ serie: s, weight: parseFloat(w) || 0, reps: parseInt(r) || 0 });
+                }
+                workoutRecord.exercises.push(exerciseData);
+            });
+
+            // EVALUAR CUMPLIMIENTO DE REPETICIONES Y AUTOMODIFICAR PESOS FUTUROS
+            evaluateWorkoutPerformance(workoutRecord);
+
+            appState.history.unshift(workoutRecord);
+            appState.workoutStarted = false;
+            appState.activeDay = null;
+            appState.draftInputs = {};
+
+            saveState();
+
+            alert(`💪 ¡Entrenamiento evaluado! La aplicación procesó tus reps y ajustó automáticamente los pesos sugeridos para las próximas sesiones.`);
+            renderWorkout();
+            switchView('history');
+        }
+
+        function deleteWorkout(index) {
+            if (confirm("¿Borrar este entreno del historial?")) {
+                appState.history.splice(index, 1);
+                saveState();
+                renderHistory();
+                renderWorkout();
+            }
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history-content');
+            if(appState.history.length === 0) {
+                container.innerHTML = `<p style="color:var(--text-light); font-size:0.9rem;">Sin entrenamientos registrados aún.</p>`;
+                return;
+            }
+
+            let html = '';
+            appState.history.forEach((item, index) => {
+                html += `
+                    <div class="card history-item">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <div>
+                                <strong style="color:#60a5fa; font-size:1.05rem;">${item.date}</strong><br>
+                                <span style="font-size:0.9rem; font-weight:bold;">${item.title}</span>
+                                <div style="margin-top:0.3rem;"><span class="badge">Ciclo ${item.cycle} - Semana ${item.week}</span></div>
+                            </div>
+                            <button class="btn-sm warning" onclick="deleteWorkout(${index})">🗑️ Borrar</button>
+                        </div>
+                        <div style="margin-top: 0.75rem; font-size: 0.85rem; border-top:1px solid var(--border); padding-top:0.5rem;">
+                `;
+                item.exercises.forEach(ex => {
+                    html += `
+                        <div style="margin-bottom:0.5rem;">
+                            <strong style="color:#e2e8f0;">${ex.name}:</strong> 
+                    `;
+                    ex.series.forEach(sr => {
+                        html += `<span style="color:#94a3b8; background:#0f172a; padding:0.1rem 0.3rem; border-radius:4px; font-family:monospace; margin-right:0.2rem;">S${sr.serie}: ${sr.weight}kg x ${sr.reps}</span> `;
+                    });
+                    if (ex.evaluation) {
+                        html += `<div style="margin-top:0.25rem;"><span class="feedback-badge ${ex.evaluation.badgeClass}">${ex.evaluation.text}</span></div>`;
+                    }
+                    html += `</div>`;
+                });
+                html += `</div></div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function updateStartDate(newDate) {
+            if(newDate) {
+                appState.startDate = newDate;
+                saveState();
+                renderWorkout();
+            }
+        }
+
+        /* TIMER DE DESCANSO */
+        let timerInterval = null, timerSeconds = 0;
+        function startRestTimer(sec, exName = '') {
+            clearInterval(timerInterval);
+            timerSeconds = sec;
+            document.getElementById('timer-bar').style.display = 'block';
+            if(exName) document.getElementById('timer-label').innerText = `Descanso: ${exName}`;
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                updateTimerDisplay();
+                if(timerSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    alert("⏱️ ¡Tiempo de descanso finalizado!");
+                    document.getElementById('timer-bar').style.display = 'none';
+                }
+            }, 1000);
+        }
+        function addTimerSeconds(s) { timerSeconds += s; updateTimerDisplay(); }
+        function stopRestTimer() { clearInterval(timerInterval); document.getElementById('timer-bar').style.display = 'none'; }
+        function updateTimerDisplay() {
+            const m = Math.floor(timerSeconds / 60), s = timerSeconds % 60;
+            document.getElementById('timer-count').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        }
+
+        function switchView(viewName) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById(`view-${viewName}`).classList.add('active');
+            document.getElementById(`nav-${viewName}`).classList.add('active');
+            if(viewName === 'history') renderHistory();
+            if(viewName === 'workout') renderWorkout();
+        }
+
+        function resetApp() {
+            if(confirm("¿Borrar todo el historial y reiniciar el programa?")) {
+                localStorage.removeItem('gymApp_adaptive_v3');
+                location.reload();
+            }
+        }
+
+        renderWorkout();
+    </script>
+</body>
+</html>
