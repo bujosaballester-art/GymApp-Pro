@@ -246,6 +246,17 @@
             background: var(--card-bg);
             border-radius: 8px;
         }
+        .history-meta-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: var(--card-inner);
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #e2e8f0;
+            border: 1px solid var(--border);
+        }
         .timer-progress { height:6px; background:#1e293b; border-radius:999px; overflow:hidden; margin-top:.45rem; }
         .timer-progress > div { height:100%; width:0%; background:#38bdf8; transition:width .25s linear; }
         .timer-controls { display:flex; flex-wrap:wrap; gap:.4rem; justify-content:flex-end; }
@@ -267,7 +278,7 @@
 
         <!-- VISTA 2: HISTORIAL -->
         <div id="view-history" class="view">
-            <h2>Historial y Evaluación Automática</h2>
+            <h2>Historial de Entrenamientos</h2>
             <div id="history-content"></div>
         </div>
 
@@ -306,7 +317,7 @@
         </div>
     </div>
 
-    <!-- CRONÓMETRO FLOTANTE -->
+    <!-- CRONÓMETRO FLOTANTE DE DESCANSO -->
     <div id="timer-bar">
         <div class="timer-container" style="display:block;">
             <div style="display:flex;justify-content:space-between;gap:.7rem;align-items:center;">
@@ -417,6 +428,7 @@
             cycleCalculatedWeights: {},
             progressionEngineVersion: 4,
             workoutStarted: false,
+            workoutStartTime: null,
             activeDay: 'A',
             activeCycle: 1,
             readinessScore: 3,
@@ -434,7 +446,8 @@
                     ? source.cycleCalculatedWeights : {},
                 draftInputs: source.draftInputs && typeof source.draftInputs === 'object'
                     ? source.draftInputs : {},
-                activeDay: source.activeDay || 'A'
+                activeDay: source.activeDay || 'A',
+                workoutStartTime: source.workoutStartTime || null
             };
         }
 
@@ -448,6 +461,15 @@
 
         function saveState() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        }
+
+        function formatDuration(ms) {
+            if (!ms || ms <= 0) return '0 min';
+            const totalSecs = Math.floor(ms / 1000);
+            const mins = Math.floor(totalSecs / 60);
+            const secs = totalSecs % 60;
+            if (mins < 1) return `${secs}s`;
+            return `${mins} min ${secs}s`;
         }
 
         function getNaturalWeekAndCycle() {
@@ -593,6 +615,7 @@
 
         function startWorkout() {
             appState.workoutStarted = true;
+            appState.workoutStartTime = Date.now();
             saveState();
             renderWorkout();
         }
@@ -609,8 +632,17 @@
             const { week, cycle } = getNaturalWeekAndCycle();
             const sessionData = getEvolvedWorkoutForCycle(currentDay, cycle, week);
 
+            const endTime = Date.now();
+            const startTime = appState.workoutStartTime || endTime;
+            const durationMs = endTime - startTime;
+            const durationFormatted = formatDuration(durationMs);
+
+            const now = new Date();
+            const dateFormatted = `${now.toLocaleDateString('es-ES')} ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+
             const sessionRecord = {
-                date: new Date().toLocaleString('es-ES'),
+                date: dateFormatted,
+                duration: durationFormatted,
                 day: currentDay,
                 name: sessionData.name,
                 cycle,
@@ -643,6 +675,7 @@
 
             appState.history.unshift(sessionRecord);
             appState.workoutStarted = false;
+            appState.workoutStartTime = null;
             appState.draftInputs = {};
             
             const currentIdx = rotationOrder.indexOf(currentDay);
@@ -762,23 +795,20 @@
 
             let html = '';
             appState.history.forEach((item, index) => {
-                let exercisesHTML = '';
-                item.exercises.forEach(ex => {
-                    const setsStr = ex.sets.map((s, idx) => `S${idx+1}: ${s.weight}kg x ${s.reps}`).join(' | ');
-                    exercisesHTML += `<p style="font-size:0.85rem; margin:0.3rem 0;"><strong>${ex.name}:</strong> ${setsStr}</p>`;
-                });
+                const durationText = item.duration ? item.duration : 'Sin datos';
 
                 html += `
                     <div class="history-item">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-                            <strong>${item.name}</strong>
-                            <div style="display:flex; align-items:center; gap:0.5rem;">
-                                <small style="color:var(--text-light);">${item.date}</small>
-                                <button class="btn-sm warning" style="padding:0.2rem 0.5rem; font-size:0.75rem;" onclick="deleteHistoryItem(${index})" title="Eliminar registro">🗑️</button>
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.6rem;">
+                            <div>
+                                <strong style="font-size:1.05rem; display:block; margin-bottom:0.3rem;">${item.name}</strong>
+                                <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                                    <span class="history-meta-badge">📅 ${item.date}</span>
+                                    <span class="history-meta-badge" style="color:#38bdf8;">⏱️ ${durationText}</span>
+                                </div>
                             </div>
+                            <button class="btn-sm warning" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="deleteHistoryItem(${index})" title="Eliminar registro">🗑️</button>
                         </div>
-                        <p style="font-size:0.8rem; color:#60a5fa; margin:0 0 0.5rem 0;">Ciclo ${item.cycle || 1} - Semana ${item.week || 1}</p>
-                        ${exercisesHTML}
                     </div>
                 `;
             });
