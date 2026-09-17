@@ -99,27 +99,15 @@
             margin: 0;
         }
 
-        .cycle-evo-card {
-            background: linear-gradient(135deg, #311b92, #4a148c);
-            border: 1px solid #7e22ce;
-            padding: 1rem;
-            border-radius: 12px;
+        .day-selector {
+            display: flex;
+            gap: 0.5rem;
             margin-bottom: 1.2rem;
         }
-
-        .trainer-tip-box {
-            background: #1e1b4b;
-            border-left: 4px solid var(--accent);
-            padding: 0.85rem;
-            border-radius: 8px;
-            margin-top: 0.75rem;
-            font-size: 0.88rem;
-            color: #f1f5f9;
-        }
-        .trainer-tip-title {
-            font-weight: bold;
-            color: var(--accent);
-            margin-bottom: 0.25rem;
+        .day-selector button {
+            flex: 1;
+            padding: 0.6rem 0.2rem;
+            font-size: 0.9rem;
         }
 
         .exercise-box {
@@ -134,7 +122,6 @@
             border-left: 5px solid var(--purple);
             background: #1e1e38;
         }
-        .exercise-box.disabled-box { opacity: 0.65; }
         .exercise-header {
             display: flex;
             justify-content: space-between;
@@ -160,18 +147,6 @@
             border-radius: 6px;
             border: 1px solid var(--border);
             color: #e2e8f0;
-        }
-        .meta-pill.evo-pill {
-            background: #581c87;
-            color: #f3e8ff;
-            border-color: #9333ea;
-            font-weight: bold;
-        }
-        .meta-pill.target-pill {
-            background: #0284c7;
-            color: #e0f2fe;
-            border-color: #38bdf8;
-            font-weight: bold;
         }
 
         .tech-guide {
@@ -211,28 +186,6 @@
             text-align: center;
             font-size: 0.95rem;
         }
-
-        @media (max-width: 420px) {
-            .container { padding: 0.75rem; }
-            .card, .exercise-box { padding: 0.9rem; }
-            .exercise-header { gap: 0.5rem; }
-            .series-row { gap: 0.22rem; flex-wrap: wrap; }
-            .series-row input { width: 58px; }
-            .series-row label { flex: 0 0 48px; font-size: 0.8rem; }
-            .exercise-meta .btn-sm { width: auto; }
-        }
-
-        .feedback-badge {
-            display: inline-block;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            margin-left: 0.5rem;
-        }
-        .badge-promoted { background: #15803d; color: #dcfce7; }
-        .badge-maintained { background: #854d0e; color: #fef08a; }
-        .badge-deload { background: #991b1b; color: #fee2e2; }
 
         #timer-bar {
             display: none;
@@ -286,37 +239,17 @@
         }
         .view { display: none; }
         .view.active { display: block; }
-        .badge {
-            background: #1e3a8a;
-            color: #93c5fd;
-            padding: 0.25rem 0.55rem;
-            border-radius: 6px;
-            font-size: 0.78rem;
-            font-weight: bold;
-        }
         .history-item { 
             border-left: 4px solid var(--primary); 
             padding: 1rem; 
             margin-bottom: 1rem;
+            background: var(--card-bg);
+            border-radius: 8px;
         }
-
-        /* ===== GYM APP 4.0 ===== */
-        .coach4-panel { background:linear-gradient(135deg,#172554,#312e81); border-color:#6366f1; }
-        .coach4-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.65rem; }
-        .coach4-stat { background:#0f172a; border:1px solid #475569; border-radius:10px; padding:.7rem; }
-        .coach4-stat strong { display:block; font-size:1.1rem; color:#f8fafc; }
-        .coach4-stat span { font-size:.75rem; color:#94a3b8; }
-        .exercise-illustration { display:flex; justify-content:center; align-items:center; min-height:150px; margin-bottom:.8rem; background:#020617; border:1px solid #334155; border-radius:10px; overflow:hidden; }
-        .exercise-illustration svg { width:100%; max-width:360px; height:150px; }
-        .tech-columns { display:grid; grid-template-columns:minmax(0,1fr); gap:.8rem; }
-        .coach-note { background:#172554; border-left:4px solid #60a5fa; padding:.75rem; border-radius:8px; font-size:.82rem; }
         .timer-progress { height:6px; background:#1e293b; border-radius:999px; overflow:hidden; margin-top:.45rem; }
         .timer-progress > div { height:100%; width:0%; background:#38bdf8; transition:width .25s linear; }
         .timer-controls { display:flex; flex-wrap:wrap; gap:.4rem; justify-content:flex-end; }
         .timer-controls .btn-sm { min-width:58px; }
-        .duration-pill { background:#0f766e; color:#ccfbf1; border:1px solid #14b8a6; }
-        .coach-decision { padding:.65rem .75rem; border-radius:8px; background:#0f172a; border:1px solid #475569; margin-top:.55rem; }
-        @media (min-width:560px){ .coach4-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } .tech-columns { grid-template-columns:1fr 1fr; } }
     </style>
 </head>
 <body>
@@ -373,12 +306,14 @@
         </div>
     </div>
 
-    <!-- CRONÓMETRO FLOTANTE 4.0 -->
+    <!-- CRONÓMETRO FLOTANTE -->
     <div id="timer-bar">
         <div class="timer-container" style="display:block;">
             <div style="display:flex;justify-content:space-between;gap:.7rem;align-items:center;">
-                <div><small id="timer-label" style="color:#94a3b8; display:block; font-size:0.8rem;">Descanso</small>
-                <span id="timer-count" class="timer-display">00:00</span></div>
+                <div>
+                    <small id="timer-label" style="color:#94a3b8; display:block; font-size:0.8rem;">Descanso</small>
+                    <span id="timer-count" class="timer-display">00:00</span>
+                </div>
                 <div class="timer-controls">
                     <button class="btn-sm secondary" onclick="adjustRestTimer(-15)">−15</button>
                     <button class="btn-sm secondary" onclick="adjustRestTimer(15)">+15</button>
@@ -436,7 +371,6 @@
                 { id: 'peso_muerto_rum', name: 'Peso Muerto Rumano', muscle: 'Isquios / Glúteo', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 120, baseWeight: 50, tempo: '3-1-1-0', steps: ['Cadera hacia atrás.', 'Barra pegada a piernas.'] },
                 { id: 'curl_femoral', name: 'Curl Femoral Tumbado', muscle: 'Isquios Aislamiento', series: 4, minReps: 10, maxReps: 12, targetReps: '10-12 reps', defaultRest: 90, baseWeight: 35, tempo: '2-1-1-0', steps: ['Contracción fuerte en la flexión.'] }
             ],
-
             tiron_accesorio: [
                 { id:'pullover_polea', name:'Pullover en Polea Alta', muscle:'Dorsal Ancho', series:3, minReps:10, maxReps:12, targetReps:'10-12 reps', defaultRest:75, baseWeight:20, tempo:'2-1-1-0', steps:['Mantén brazos ligeramente flexionados.','Lleva la barra hacia los muslos sin convertirlo en un jalón.','Controla el estiramiento.'] },
                 { id:'remo_pecho_apoyado', name:'Remo con Pecho Apoyado', muscle:'Espalda Media', series:3, minReps:8, maxReps:12, targetReps:'8-12 reps', defaultRest:90, baseWeight:30, tempo:'2-1-1-0', steps:['Pecho estable contra el apoyo.','Lleva los codos hacia atrás.','Evita encoger los hombros.'] }
@@ -475,8 +409,6 @@
         };
 
         const rotationOrder = ['A', 'B', 'C', 'D'];
-
-        // ESTADO GLOBAL
         const STORAGE_KEY = 'gymApp_adaptive_v3';
 
         const defaultAppState = {
@@ -484,44 +416,27 @@
             history: [],
             cycleNumber: 1,
             cycleCalculatedWeights: {},
-            progressionEngineVersion: 3,
+            progressionEngineVersion: 4,
             workoutStarted: false,
-            activeDay: null,
-            activeCycle: null,
+            activeDay: 'A',
+            activeCycle: 1,
             readinessScore: 3,
             sessionRPE: '',
-            draftInputs: {},
-            workoutStartTime: null,
-            workoutElapsedSeconds: 0,
-            coachV4: { version: 4, reports: [] }
+            draftInputs: {}
         };
 
         function normalizeState(raw) {
             const source = raw && typeof raw === 'object' ? raw : {};
-            const state = {
+            return {
                 ...defaultAppState,
                 ...source,
                 history: Array.isArray(source.history) ? source.history : [],
                 cycleCalculatedWeights: source.cycleCalculatedWeights && typeof source.cycleCalculatedWeights === 'object'
                     ? source.cycleCalculatedWeights : {},
                 draftInputs: source.draftInputs && typeof source.draftInputs === 'object'
-                    ? source.draftInputs : {}
+                    ? source.draftInputs : {},
+                activeDay: source.activeDay || 'A'
             };
-
-            // Backwards compatibility: old versions stored weights only by exercise id.
-            // Keep them as legacy values; new writes use cycle:id keys.
-            if (!state.startDate || !/^\d{4}-\d{2}-\d{2}$/.test(state.startDate)) {
-                state.startDate = defaultAppState.startDate;
-            }
-            state.cycleNumber = Math.max(1, parseInt(state.cycleNumber, 10) || 1);
-            state.progressionEngineVersion = 4;
-            state.coachV4 = source.coachV4 && typeof source.coachV4 === 'object' ? source.coachV4 : {version:4,reports:[]};
-            state.workoutStartTime = Number.isFinite(Number(source.workoutStartTime)) ? Number(source.workoutStartTime) : null;
-            state.workoutElapsedSeconds = Math.max(0, Number(source.workoutElapsedSeconds) || 0);
-            state.readinessScore = Math.min(5, Math.max(1, parseInt(state.readinessScore, 10) || 3));
-            state.sessionRPE = state.sessionRPE === '' ? '' : Math.min(10, Math.max(1, parseInt(state.sessionRPE, 10) || 1));
-
-            return state;
         }
 
         let appState;
@@ -533,7 +448,7 @@
         }
 
         function saveState() {
-            localStorage.setItem('gymApp_adaptive_v3', JSON.stringify(appState));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
         }
 
         function getNaturalWeekAndCycle() {
@@ -545,14 +460,13 @@
             const diffMs = today - start;
             const diffDays = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
 
-            const cycle = Math.floor(diffDays / 42) + 1; 
+            const cycle = Math.floor(diffDays / 42) + Math.max(1, appState.cycleNumber || 1); 
             const dayInCycle = diffDays % 42;
             const week = Math.floor(dayInCycle / 7) + 1;
 
             return { week: Math.min(week, 6), cycle };
         }
 
-        // CÁLCULO DEL PESO AJUSTADO DINÁMICAMENTE
         function getWeightKey(exerciseId, cycle) {
             return `${cycle}:${exerciseId}`;
         }
@@ -560,16 +474,8 @@
         function getStoredWeight(exTemplate, cycle) {
             const weights = appState.cycleCalculatedWeights || {};
             const cycleKey = getWeightKey(exTemplate.id, cycle);
-
-            if (weights[cycleKey] !== undefined) {
-                return Number(weights[cycleKey]);
-            }
-
-            // Compatibilidad con backups antiguos que usaban solo exerciseId.
-            if (weights[exTemplate.id] !== undefined) {
-                return Number(weights[exTemplate.id]);
-            }
-
+            if (weights[cycleKey] !== undefined) return Number(weights[cycleKey]);
+            if (weights[exTemplate.id] !== undefined) return Number(weights[exTemplate.id]);
             return Number(exTemplate.baseWeight) || 0;
         }
 
@@ -586,7 +492,6 @@
             dayStructure.slots.forEach(slotKey => {
                 const options = exerciseEvolutionTree[slotKey] || [];
                 if (!options.length) return;
-                // Rotación semanal dentro de cada patrón, pero jamás repetimos el mismo ejercicio dentro de la sesión.
                 let chosen = options[(week - 1) % options.length];
                 if (used.has(chosen.id)) {
                     chosen = options.find(x => !used.has(x.id)) || chosen;
@@ -599,192 +504,310 @@
             return { name:dayStructure.name, focus:dayStructure.focus, exercises };
         }
 
-        function findExerciseTemplate(exerciseId, exerciseName) {
-            for (const slotKey of Object.keys(exerciseEvolutionTree)) {
-                const found = exerciseEvolutionTree[slotKey].find(ex =>
-                    (exerciseId && ex.id === exerciseId) || (exerciseName && ex.name === exerciseName)
-                );
-                if (found) return found;
-            }
-            return null;
-        }
+        // ==========================================
+        // SISTEMA DE CRONÓMETRO FLOTANTE (SIN SONIDO)
+        // ==========================================
+        let timerInterval = null;
+        let timerSecondsLeft = 0;
+        let timerTotalSeconds = 0;
+        let isTimerPaused = false;
 
-        // ================================================================
-        // MOTOR DE PROGRESIÓN 3.0 — AUTORREGULACIÓN MULTIVARIABLE
-        // Usa reps, RIR, consistencia entre series, tendencia histórica,
-        // volumen, fatiga de sesión, readiness y semanas del ciclo.
-        // ================================================================
+        function startRestTimer(seconds, label = 'Descanso') {
+            clearInterval(timerInterval);
+            timerTotalSeconds = seconds;
+            timerSecondsLeft = seconds;
+            isTimerPaused = false;
+            document.getElementById('timer-bar').style.display = 'block';
+            document.getElementById('timer-label').innerText = label;
+            document.getElementById('timer-pause-btn').innerText = 'Pausar';
+            updateTimerDisplay();
 
-        function roundToStep(value, step = 0.5) {
-            return Math.round(value / step) * step;
-        }
-
-        function getProgressionIncrement(template) {
-            const id = String(template.id || '').toLowerCase();
-            const muscle = String(template.muscle || '').toLowerCase();
-
-            // Incrementos pequeños para aislamientos y movimientos con mancuernas;
-            // mayores para básicos/máquinas grandes.
-            if (['press_banca', 'press_inclinado_barra', 'remo_barra', 'sentadilla', 'peso_muerto_rum'].includes(id)) return 2.5;
-            if (['prensa_piernas', 'jalon_pecho', 'remo_gironda', 'press_hombro_maquina'].includes(id)) return 2.5;
-            if (muscle.includes('pectoral') || muscle.includes('dorsal') || muscle.includes('cuádriceps') || muscle.includes('glúteo')) return 2.5;
-            return 1.25;
-        }
-
-        function getExerciseHistory(exerciseId, limit = 8) {
-            const rows = [];
-            for (const workout of (appState.history || [])) {
-                if (!Array.isArray(workout.exercises)) continue;
-                const ex = workout.exercises.find(e => e.id === exerciseId);
-                if (!ex) continue;
-                rows.push({ workout, exercise: ex });
-                if (rows.length >= limit) break;
-            }
-            return rows;
-        }
-
-        function normalizeRIR(value, fallback = 2) {
-            const n = Number(value);
-            if (!Number.isFinite(n)) return fallback;
-            return Math.min(5, Math.max(0, Math.round(n)));
-        }
-
-        function estimateE1RM(weight, reps) {
-            // Epley + ajuste sencillo por reps en reserva. No pretende sustituir
-            // una prueba máxima; sirve para detectar tendencia con cargas submáximas.
-            if (!(weight > 0) || !(reps > 0)) return 0;
-            return weight * (1 + reps / 30);
-        }
-
-        function getHistoricalMetrics(exerciseId) {
-            const rows = getExerciseHistory(exerciseId, 8);
-            if (!rows.length) {
-                return {
-                    sessions: 0, avgE1RM: 0, previousE1RM: 0,
-                    trendPct: 0, consecutiveMisses: 0, consecutiveSuccesses: 0
-                };
-            }
-
-            const sessionMetrics = rows.map(({ exercise }) => {
-                const sets = (exercise.series || []).filter(s =>
-                    Number(s.weight) > 0 && Number(s.reps) > 0
-                );
-                if (!sets.length) return null;
-
-                const e1rms = sets.map(s => estimateE1RM(Number(s.weight), Number(s.reps)));
-                const avgRIR = sets.reduce((a, s) => a + normalizeRIR(s.rir, 2), 0) / sets.length;
-                const avgReps = sets.reduce((a, s) => a + Number(s.reps), 0) / sets.length;
-                return {
-                    e1rm: Math.max(...e1rms),
-                    avgRIR,
-                    avgReps,
-                    status: exercise.evaluation?.status || 'UNKNOWN'
-                };
-            }).filter(Boolean);
-
-            if (!sessionMetrics.length) {
-                return { sessions: 0, avgE1RM: 0, previousE1RM: 0, trendPct: 0, consecutiveMisses: 0, consecutiveSuccesses: 0 };
-            }
-
-            const current = sessionMetrics[0].e1rm;
-            const previous = sessionMetrics[1]?.e1rm || current;
-            const baseline = sessionMetrics.slice(1).reduce((a, x) => a + x.e1rm, 0) / Math.max(1, sessionMetrics.length - 1);
-
-            let consecutiveMisses = 0;
-            let consecutiveSuccesses = 0;
-            for (const m of sessionMetrics) {
-                if (m.status === 'REGRESSED' || m.status === 'HOLD_FATIGUE') consecutiveMisses++;
-                else break;
-            }
-            for (const m of sessionMetrics) {
-                if (m.status === 'PROMOTED' || m.status === 'MAINTAINED') consecutiveSuccesses++;
-                else break;
-            }
-
-            return {
-                sessions: sessionMetrics.length,
-                avgE1RM: baseline || current,
-                previousE1RM: previous,
-                trendPct: previous ? ((current - previous) / previous) * 100 : 0,
-                consecutiveMisses,
-                consecutiveSuccesses
-            };
-        }
-
-        function evaluateWorkoutPerformance(workoutRecord) {
-            const readiness = Number(workoutRecord.readinessScore) || 3;
-            const sessionRPE = Number(workoutRecord.sessionRPE) || 0;
-            workoutRecord.engine = { version:4, readiness, sessionRPE, decisions:0, promoted:0, maintained:0, reduced:0, deload:false };
-            workoutRecord.exercises.forEach(recordedEx => {
-                const template = findExerciseTemplate(recordedEx.id, recordedEx.name);
-                if (!template) return;
-                const minR = Number(template.minReps)||6, maxR = Number(template.maxReps)||8;
-                const valid = recordedEx.series.filter(s=>Number(s.reps)>0 && Number(s.weight)>0);
-                if (!valid.length) { recordedEx.evaluation={status:'NO_DATA',text:'ℹ️ Sin datos válidos: no se modifica la carga.',badgeClass:'badge-maintained'}; return; }
-                const reps=valid.map(s=>Number(s.reps)), weights=valid.map(s=>Number(s.weight));
-                const avgReps=reps.reduce((a,b)=>a+b,0)/reps.length;
-                const consistency=1-(Math.max(...reps)-Math.min(...reps))/Math.max(1,maxR);
-                const e1rm=Math.max(...valid.map(s=>estimateE1RM(Number(s.weight),Number(s.reps),2)));
-                const history=getHistoricalMetrics(template.id);
-                const key=getWeightKey(template.id,workoutRecord.cycle);
-                const current=getStoredWeight(template,workoutRecord.cycle)||Math.max(...weights);
-                const inc=getProgressionIncrement(template);
-                const lowReady=readiness<=2, highRPE=sessionRPE>=9, veryHighRPE=sessionRPE>=10;
-                const poorConsistency=consistency<0.55;
-                const trendDown=history.sessions>=2 && history.trendPct<=-3;
-                const trendUp=history.sessions>=2 && history.trendPct>=3;
-                let status='MAINTAINED', next=current, text=`👍 Mantén ${current} kg.`;
-                if (workoutRecord.week===6) {
-                    next=current; status='DELOAD'; workoutRecord.engine.deload=true;
-                    text=`🔄 Descarga: ${current} kg queda como referencia. El rendimiento de esta semana no altera la progresión.`;
-                } else if (veryHighRPE || (highRPE && avgReps<maxR)) {
-                    status='HOLD_FATIGUE'; text=`🧠 Fatiga alta: mantén ${current} kg y consolida.`;
-                } else if (avgReps<minR) {
-                    const reduction=(trendDown||history.consecutiveMisses>=1)?0.075:0.05;
-                    next=Math.max(0,roundToStep(current*(1-reduction),0.5)); status='REGRESSED';
-                    text=`⚠️ Por debajo del mínimo: próxima carga ${next} kg.`;
-                } else if (lowReady || poorConsistency || avgReps<maxR || highRPE) {
-                    status='MAINTAINED';
-                    const why=lowReady?'readiness bajo':poorConsistency?'series poco consistentes':highRPE?'sRPE alto':'aún puedes consolidar repeticiones';
-                    text=`👍 Mantén ${current} kg: ${why}.`;
-                } else {
-                    next=roundToStep(current+inc,0.5); status='PROMOTED';
-                    text=trendUp?`🚀 Progresión sólida: ${next} kg (+${inc} kg), con tendencia positiva.`:`🎯 Objetivo completo: ${next} kg (+${inc} kg).`;
+            timerInterval = setInterval(() => {
+                if (!isTimerPaused) {
+                    timerSecondsLeft--;
+                    updateTimerDisplay();
+                    if (timerSecondsLeft <= 0) {
+                        stopRestTimer(); // Finalización silenciosa sin audio
+                    }
                 }
-                appState.cycleCalculatedWeights[key]=next;
-                recordedEx.metrics={avgReps:Number(avgReps.toFixed(2)),consistency:Number(Math.max(0,consistency).toFixed(2)),volume:Number(valid.reduce((a,s)=>a+Number(s.weight)*Number(s.reps),0).toFixed(1)),estimated1RM:Number(e1rm.toFixed(1)),trendPct:Number(history.trendPct.toFixed(2))};
-                recordedEx.evaluation={status,text,badgeClass:status==='PROMOTED'?'badge-promoted':(status==='DELOAD'||status==='REGRESSED'?'badge-deload':'badge-maintained')};
-                workoutRecord.engine.decisions++;
-                if(status==='PROMOTED') workoutRecord.engine.promoted++;
-                else if(status==='REGRESSED') workoutRecord.engine.reduced++;
-                else workoutRecord.engine.maintained++;
-            });
+            }, 1000);
         }
 
-        function forceCycleEvolution() {
+        function stopRestTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('timer-bar').style.display = 'none';
+        }
+
+        function adjustRestTimer(delta) {
+            timerSecondsLeft = Math.max(0, timerSecondsLeft + delta);
+            timerTotalSeconds = Math.max(timerTotalSeconds, timerSecondsLeft);
+            updateTimerDisplay();
+        }
+
+        function toggleRestTimerPause() {
+            isTimerPaused = !isTimerPaused;
+            document.getElementById('timer-pause-btn').innerText = isTimerPaused ? 'Reanudar' : 'Pausar';
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timerSecondsLeft / 60);
+            const secs = timerSecondsLeft % 60;
+            document.getElementById('timer-count').innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            const fill = document.getElementById('timer-progress-fill');
+            if (fill && timerTotalSeconds > 0) {
+                const pct = Math.max(0, Math.min(100, ((timerTotalSeconds - timerSecondsLeft) / timerTotalSeconds) * 100));
+                fill.style.width = `${pct}%`;
+            }
+        }
+
+        // ==========================================
+        // VISTAS Y RENDERIZADO DE ENTRENAMIENTOS
+        // ==========================================
+        function updateCycleHeader() {
+            const { week, cycle } = getNaturalWeekAndCycle();
+            document.getElementById('cycle-info').innerText = `Ciclo ${cycle} | Semana ${week} de 6`;
+            const dateInput = document.getElementById('cycle-start-date');
+            if (dateInput) dateInput.value = appState.startDate;
+        }
+
+        function switchView(viewName) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(`view-${viewName}`).classList.add('active');
+            document.getElementById(`nav-${viewName}`).classList.add('active');
+
+            if (viewName === 'workout') renderWorkout();
+            if (viewName === 'history') renderHistory();
+        }
+
+        function selectDay(dayKey) {
+            appState.activeDay = dayKey;
+            saveState();
+            renderWorkout();
+        }
+
+        function toggleTechGuide(id) {
+            const el = document.getElementById(`tech-${id}`);
+            if (el) el.classList.toggle('show');
+        }
+
+        function startWorkout() {
+            appState.workoutStarted = true;
+            saveState();
+            renderWorkout();
+        }
+
+        function onInputChange(exId, setIdx, field, val) {
+            if (!appState.draftInputs[exId]) appState.draftInputs[exId] = {};
+            if (!appState.draftInputs[exId][setIdx]) appState.draftInputs[exId][setIdx] = {};
+            appState.draftInputs[exId][setIdx][field] = val;
+            saveState();
+        }
+
+        function finishWorkout() {
+            const currentDay = appState.activeDay;
+            const { week, cycle } = getNaturalWeekAndCycle();
+            const sessionData = getEvolvedWorkoutForCycle(currentDay, cycle, week);
+
+            const sessionRecord = {
+                date: new Date().toLocaleString('es-ES'),
+                day: currentDay,
+                name: sessionData.name,
+                cycle,
+                week,
+                exercises: []
+            };
+
+            sessionData.exercises.forEach(ex => {
+                const exDraft = (appState.draftInputs && appState.draftInputs[ex.id]) || {};
+                const completedSets = [];
+                let maxWeight = ex.calculatedBaseWeight;
+
+                for (let i = 0; i < ex.series; i++) {
+                    const setData = exDraft[i] || {};
+                    const weight = parseFloat(setData.weight) || ex.calculatedBaseWeight;
+                    const reps = parseInt(setData.reps, 10) || ex.minReps;
+                    const rir = parseInt(setData.rir, 10) || 2;
+                    completedSets.push({ weight, reps, rir });
+                    if (weight > maxWeight) maxWeight = weight;
+                }
+
+                sessionRecord.exercises.push({
+                    id: ex.id,
+                    name: ex.name,
+                    sets: completedSets
+                });
+
+                // Auto-progresión básica para el siguiente ciclo
+                const key = getWeightKey(ex.id, cycle + 1);
+                appState.cycleCalculatedWeights[key] = maxWeight + 2.5;
+            });
+
+            appState.history.unshift(sessionRecord);
+            appState.workoutStarted = false;
+            appState.draftInputs = {};
+            
+            // Avanzar automáticamente al siguiente día de la rutina
+            const currentIdx = rotationOrder.indexOf(currentDay);
+            appState.activeDay = rotationOrder[(currentIdx + 1) % rotationOrder.length];
+
+            saveState();
+            alert('¡Entrenamiento guardado con éxito!');
+            renderWorkout();
+        }
+
+        function renderWorkout() {
+            const container = document.getElementById('workout-content');
+            const { week, cycle } = getNaturalWeekAndCycle();
+            const activeDay = appState.activeDay || 'A';
+            const workout = getEvolvedWorkoutForCycle(activeDay, cycle, week);
+
+            let daySelectorHTML = `<div class="day-selector">`;
+            rotationOrder.forEach(day => {
+                const isSelected = day === activeDay ? 'class="success"' : 'class="secondary"';
+                daySelectorHTML += `<button ${isSelected} onclick="selectDay('${day}')">Sesión ${day}</button>`;
+            });
+            daySelectorHTML += `</div>`;
+
+            let html = daySelectorHTML;
+
+            html += `
+                <div class="status-banner">
+                    <h3>Sesión Actual</h3>
+                    <p class="session-title">${workout.name}</p>
+                    <p style="margin:0.4rem 0 0 0; font-size:0.85rem; opacity:0.9;">Enfoque: ${workout.focus}</p>
+                </div>
+            `;
+
+            if (!appState.workoutStarted) {
+                html += `
+                    <div class="card">
+                        <h3>¿Listo para comenzar?</h3>
+                        <p style="font-size:0.9rem; color:var(--text-light);">Haz clic abajo para iniciar la sesión y registrar tus marcas.</p>
+                        <button onclick="startWorkout()" class="success">🚀 Iniciar Entrenamiento</button>
+                    </div>
+                `;
+            }
+
+            workout.exercises.forEach(ex => {
+                const exDraft = appState.draftInputs[ex.id] || {};
+                let seriesRows = '';
+
+                for (let s = 0; s < ex.series; s++) {
+                    const setData = exDraft[s] || {};
+                    const weightVal = setData.weight !== undefined ? setData.weight : ex.calculatedBaseWeight;
+                    const repsVal = setData.reps !== undefined ? setData.reps : ex.minReps;
+                    const rirVal = setData.rir !== undefined ? setData.rir : 2;
+
+                    seriesRows += `
+                        <div class="series-row">
+                            <label>S${s + 1}</label>
+                            <input type="number" step="0.5" value="${weightVal}" placeholder="kg" ${!appState.workoutStarted ? 'disabled' : ''} onchange="onInputChange('${ex.id}', ${s}, 'weight', this.value)"> kg
+                            <input type="number" value="${repsVal}" placeholder="reps" ${!appState.workoutStarted ? 'disabled' : ''} onchange="onInputChange('${ex.id}', ${s}, 'reps', this.value)"> reps
+                            <input type="number" value="${rirVal}" placeholder="RIR" ${!appState.workoutStarted ? 'disabled' : ''} onchange="onInputChange('${ex.id}', ${s}, 'rir', this.value)"> RIR
+                            ${appState.workoutStarted ? `<button class="btn-sm secondary" style="margin-left:auto;" onclick="startRestTimer(${ex.defaultRest}, '${ex.name}')">⏱️ Rest (${ex.defaultRest}s)</button>` : ''}
+                        </div>
+                    `;
+                }
+
+                html += `
+                    <div class="exercise-box ${ex.isSuperset ? 'superset' : ''}">
+                        <div class="exercise-header">
+                            <div>
+                                <div class="exercise-title">${ex.name}</div>
+                                <div class="exercise-meta">
+                                    <span class="meta-pill">${ex.muscle}</span>
+                                    <span class="meta-pill">${ex.series} series x ${ex.targetReps}</span>
+                                    <span class="meta-pill">Objetivo: ${ex.calculatedBaseWeight} kg</span>
+                                </div>
+                            </div>
+                            <button class="btn-sm secondary" onclick="toggleTechGuide('${ex.id}')">📖 Técnica</button>
+                        </div>
+
+                        <div id="tech-${ex.id}" class="tech-guide">
+                            <strong>Instrucciones:</strong>
+                            <ul class="tech-steps">
+                                ${ex.steps.map(step => `<li>${step}</li>`).join('')}
+                            </ul>
+                            <p style="font-size:0.8rem; margin:0.5rem 0 0 0; color:#94a3b8;">Tempo: ${ex.tempo}</p>
+                        </div>
+
+                        <div style="margin-top:1rem;">
+                            ${seriesRows}
+                        </div>
+                    </div>
+                `;
+            });
+
             if (appState.workoutStarted) {
-                alert('⚠️ Finaliza o cancela el entrenamiento actual antes de cambiar de ciclo.');
+                html += `
+                    <div style="margin-top:1.5rem; margin-bottom:2rem;">
+                        <button onclick="finishWorkout()" class="success" style="font-size:1.1rem; padding:1rem;">✅ Finalizar Entrenamiento</button>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history-content');
+            if (!appState.history || appState.history.length === 0) {
+                container.innerHTML = `<div class="card"><p>No hay entrenamientos registrados en el historial.</p></div>`;
                 return;
             }
 
-            const { cycle: naturalCycle } = getNaturalWeekAndCycle();
-            appState.cycleNumber = Math.max(naturalCycle, appState.cycleNumber) + 1;
+            let html = '';
+            appState.history.forEach(item => {
+                let exercisesHTML = '';
+                item.exercises.forEach(ex => {
+                    const setsStr = ex.sets.map((s, idx) => `S${idx+1}: ${s.weight}kg x ${s.reps} (RIR ${s.rir})`).join(' | ');
+                    exercisesHTML += `<p style="font-size:0.85rem; margin:0.3rem 0;"><strong>${ex.name}:</strong> ${setsStr}</p>`;
+                });
+
+                html += `
+                    <div class="history-item">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                            <strong>${item.name}</strong>
+                            <small style="color:var(--text-light);">${item.date}</small>
+                        </div>
+                        <p style="font-size:0.8rem; color:#60a5fa; margin:0 0 0.5rem 0;">Ciclo ${item.cycle || 1} - Semana ${item.week || 1}</p>
+                        ${exercisesHTML}
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // ==========================================
+        // CONFIGURACIÓN Y GESTIÓN DE DATOS
+        // ==========================================
+        function updateStartDate(val) {
+            if (val) {
+                appState.startDate = val;
+                saveState();
+                updateCycleHeader();
+                renderWorkout();
+            }
+        }
+
+        function forceCycleEvolution() {
+            appState.cycleNumber = (appState.cycleNumber || 1) + 1;
             saveState();
-
-            alert(`🚀 ¡Ciclo ${appState.cycleNumber} activado! Se renovarán las variantes de ejercicios.`);
-            setInterval(()=>{ const el=document.getElementById('live-workout-duration'); if(el && appState.workoutStarted) el.innerText=formatDuration(getWorkoutElapsedSeconds()); },1000);
-
-        renderWorkout();
+            updateCycleHeader();
+            renderWorkout();
+            alert(`¡Progresado al Ciclo ${appState.cycleNumber}!`);
         }
 
         function exportBackup() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", `gymApp_autoprogress_${new Date().toISOString().split('T')[0]}.json`);
-            document.body.appendChild(dlAnchorElem);
-            dlAnchorElem.click();
-            dlAnchorElem.remove();
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `gymapp_backup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
         }
 
         function importBackup(event) {
@@ -793,459 +816,34 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const importedState = JSON.parse(e.target.result);
-                    if (importedState && typeof importedState === 'object') {
-                        if (confirm("¿Restaurar copia de seguridad?")) {
-                            if (!Array.isArray(importedState.history) ||
-                                !importedState.cycleCalculatedWeights ||
-                                typeof importedState.cycleCalculatedWeights !== 'object') {
-                                throw new Error('Formato de backup no válido');
-                            }
-
-                            appState = normalizeState(importedState);
-                            appState.workoutStarted = false;
-                            appState.activeDay = null;
-                            appState.activeCycle = null;
-                            appState.draftInputs = {};
-                            saveState();
-                            alert("✅ Backup cargado.");
-                            location.reload();
-                        }
-                    }
-                } catch (err) { alert("❌ Error en archivo JSON."); }
+                    const imported = JSON.parse(e.target.result);
+                    appState = normalizeState(imported);
+                    saveState();
+                    updateCycleHeader();
+                    renderWorkout();
+                    alert("Copia de seguridad restaurada correctamente.");
+                } catch (err) {
+                    alert("Error al leer el archivo JSON.");
+                }
             };
             reader.readAsText(file);
         }
 
-        function getAutoNextDay() {
-            if (!appState.history || appState.history.length === 0) return 'A';
-            const lastWorkout = appState.history[0];
-            const lastTab = lastWorkout.dayTab || 'A';
-            const currentIndex = rotationOrder.indexOf(lastTab);
-            if (currentIndex === -1) return 'A';
-            return rotationOrder[(currentIndex + 1) % rotationOrder.length];
-        }
-
-        function setReadiness(value) {
-            appState.readinessScore = Math.min(5, Math.max(1, Number(value) || 3));
-            saveState();
-            renderWorkout();
-        }
-
-        function startWorkout() {
-            if (appState.workoutStarted) return;
-
-            const { cycle: naturalCycle } = getNaturalWeekAndCycle();
-            const currentCycle = Math.max(naturalCycle, appState.cycleNumber);
-
-            appState.workoutStarted = true;
-            appState.workoutStartTime = Date.now();
-            appState.workoutElapsedSeconds = 0;
-            appState.activeDay = getAutoNextDay();
-            appState.activeCycle = currentCycle;
-            appState.draftInputs = {};
-            saveState();
-            renderWorkout();
-        }
-
-        function cancelWorkout() {
-            if(confirm("¿Cancelar entrenamiento en curso?")) {
-                appState.workoutStarted = false;
-                appState.activeDay = null;
-                appState.workoutStartTime = null;
-                appState.workoutElapsedSeconds = 0;
-                appState.draftInputs = {};
-                saveState();
-                renderWorkout();
-            }
-        }
-
-        function updateDraft(key, val) {
-            appState.draftInputs[key] = val;
-            saveState();
-        }
-
-        function toggleTech(id) {
-            const el = document.getElementById(`tech-${id}`);
-            if(el) el.classList.toggle('show');
-        }
-
-        function escapeHtml(value) {
-            return String(value ?? '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-
-        function exerciseIllustration(ex) {
-            const id=String(ex.id||'').toLowerCase();
-            let pose='▱';
-            if(id.includes('sentadilla')||id.includes('prensa')||id.includes('zancada')) pose='◯';
-            else if(id.includes('press')||id.includes('fondos')) pose='↗';
-            else if(id.includes('remo')||id.includes('jalon')||id.includes('pullover')) pose='↘';
-            else if(id.includes('curl')||id.includes('triceps')) pose='↕';
-            else if(id.includes('gemelo')) pose='↥';
-            else if(id.includes('crunch')||id.includes('piernas')) pose='↶';
-            return `<div class="exercise-illustration" aria-label="Esquema visual de ${escapeHtml(ex.name)}"><svg viewBox="0 0 360 150" role="img"><rect x="0" y="0" width="360" height="150" fill="#020617"/><circle cx="180" cy="45" r="13" fill="none" stroke="#60a5fa" stroke-width="3"/><path d="M180 58 L180 105 M180 70 L145 82 M180 70 L215 82 M180 105 L155 130 M180 105 L205 130" fill="none" stroke="#e2e8f0" stroke-width="5" stroke-linecap="round"/><path d="M130 132 H230" stroke="#475569" stroke-width="4"/><text x="180" y="25" text-anchor="middle" fill="#94a3b8" font-size="12">ESQUEMA TÉCNICO</text><text x="180" y="143" text-anchor="middle" fill="#38bdf8" font-size="18" font-weight="700">${pose}</text></svg></div>`;
-        }
-
-        function renderWorkout() {
-            const container = document.getElementById('workout-content');
-            const { week, cycle: naturalCycle } = getNaturalWeekAndCycle();
-            const currentCycle = Math.max(naturalCycle, appState.cycleNumber);
-            
-            const currentDayTab = appState.workoutStarted ? (appState.activeDay || getAutoNextDay()) : getAutoNextDay();
-            const rutinaObj = getEvolvedWorkoutForCycle(currentDayTab, currentCycle);
-
-            document.getElementById('cycle-info').innerText = `Ciclo ${currentCycle} • Semana ${week} de 6`;
-            if(document.getElementById('cycle-start-date')) {
-                document.getElementById('cycle-start-date').value = appState.startDate;
-            }
-
-            const isStarted = appState.workoutStarted;
-
-            let html = `
-                <div class="status-banner">
-                    <h3>🎯 Sesión Adaptativa Asignada</h3>
-                    <div class="session-title">${escapeHtml(rutinaObj.name)}</div>
-                    <div style="font-size:0.88rem; opacity:0.95; margin-top:0.3rem;">Foco: ${escapeHtml(rutinaObj.focus)}</div>
-                </div>
-
-                <div class="cycle-evo-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="color:#e9d5ff; font-weight:bold; font-size:0.9rem;">🤖 Entrenador Adaptativo 4.0</span>
-                        <span class="badge" style="background:#581c87; color:#f3e8ff;">${week === 6 ? 'DESCARGA (60% Carga)' : 'FASE DE CARGA'}</span>
-                    </div>
-                    <p style="margin:0.4rem 0 0 0; font-size:0.8rem; color:#cbd5e1;">
-                        Si cumples las reps máximas objetivo con el peso asignado, la app subirá automáticamente el peso para tu siguiente sesión.
-                    </p>
-                </div>
-            `;
-
-            if (!isStarted) {
-                html += `
-                    <div class="card" style="background:#172554; border-color:#3b82f6;">
-                        <div style="font-weight:800; margin-bottom:0.55rem;">🧠 Readiness antes de entrenar</div>
-                        <div style="font-size:0.82rem; color:#cbd5e1; margin-bottom:0.65rem;">
-                            Dile al motor cómo llegas hoy. No cambia tu historial: solo ajusta lo agresiva que será la progresión.
-                        </div>
-                        <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:0.4rem;">
-                            ${[1,2,3,4,5].map(v => `
-                                <button onclick="setReadiness(${v})"
-                                    class="btn-sm ${appState.readinessScore === v ? 'success' : 'secondary'}"
-                                    style="padding:0.65rem 0.2rem;">
-                                    ${v}<br><small>${['Muy bajo','Bajo','Normal','Bueno','Excelente'][v-1]}</small>
-                                </button>`).join('')}
-                        </div>
-                        <div style="text-align:center; margin-top:0.55rem; font-size:0.82rem; color:#93c5fd;">
-                            Readiness seleccionado: <strong>${appState.readinessScore}/5</strong>
-                        </div>
-                        <button onclick="startWorkout()" class="success" style="font-size:1.1rem; padding:0.95rem; width:100%; margin-top:0.8rem;">
-                            ▶️ Comenzar Entrenamiento ${currentDayTab}
-                        </button>
-                    </div>`;
-            } else {
-                html += `
-                    <div class="card" style="display:flex; justify-content:space-between; align-items:center; background:#450a0a; border-color:#ef4444;">
-                        <span style="color:#fca5a5; font-size:0.88rem; font-weight:bold;">🔴 SESIÓN ${currentDayTab} EN CURSO · ⏱️ <span id="live-workout-duration">${formatDuration(getWorkoutElapsedSeconds())}</span></span>
-                        <button onclick="cancelWorkout()" class="btn-sm warning">Cancelar</button>
-                    </div>`;
-            }
-
-            rutinaObj.exercises.forEach((ex, index) => {
-                let currentBaseW = ex.calculatedBaseWeight;
-                if(week === 6) currentBaseW = Math.round((currentBaseW * 0.6) * 2) / 2;
-
-                const isSs = ex.isSuperset;
-
-                html += `
-                    <div class="exercise-box ${isSs ? 'superset' : ''} ${!isStarted ? 'disabled-box' : ''}">
-                        <div class="exercise-header">
-                            <div>
-                                <span class="exercise-title">${index + 1}. ${escapeHtml(ex.name)}</span>
-                                <div style="font-size:0.83rem; color:var(--text-light); margin-top:0.1rem;">Anatomía: <strong style="color:#60a5fa;">${escapeHtml(ex.muscle)}</strong></div>
-                            </div>
-                            <button class="btn-sm secondary" onclick="toggleTech('${ex.id}')">📐 Guía & Técnica</button>
-                        </div>
-
-                        <div id="tech-${ex.id}" class="tech-guide">
-                            ${exerciseIllustration(ex)}
-                            <div class="tech-columns"><div class="trainer-tip-box">
-                                <div class="trainer-tip-title">⚡ Cadencia / Tempo: ${escapeHtml(ex.tempo)}</div>
-                                <ul class="tech-steps">
-                                    ${ex.steps.map(s => `<li>${escapeHtml(s)}</li>`).join('')}
-                                </ul>
-                            </div><div class="coach-note"><strong>🎯 Clave:</strong> usa el rango completo que puedas controlar, mantén la trayectoria estable y detén la serie si la técnica se degrada claramente.</div></div>
-                        </div>
-
-                        <div class="exercise-meta">
-                            <span class="meta-pill target-pill">🎯 Objetivo: ${ex.targetReps}</span>
-                            <span class="meta-pill evo-pill">⚖️ Carga Recomendada: ${currentBaseW} kg</span>
-                            <button class="btn-sm" style="background:#0284c7;" onclick="startRestTimer(${ex.defaultRest}, '${escapeHtml(ex.name)}')" ${!isStarted ? 'disabled' : ''}>⏱️ Timer (${ex.defaultRest}s)</button>
-                        </div>
-
-                        <div style="margin-top: 0.85rem;">
-                `;
-
-                for(let s = 1; s <= ex.series; s++) {
-                    let wKey = `${currentDayTab}-w-${ex.id}-s${s}`;
-                    let rKey = `${currentDayTab}-r-${ex.id}-s${s}`;
-
-                    let valW = appState.draftInputs[wKey] !== undefined ? appState.draftInputs[wKey] : (isStarted ? currentBaseW : '');
-                    let valR = appState.draftInputs[rKey] !== undefined ? appState.draftInputs[rKey] : '';
-                    let valRIR = appState.draftInputs[rirKey] !== undefined ? appState.draftInputs[rirKey] : '';
-
-                    html += `
-                        <div class="series-row">
-                            <label>Serie ${s}</label>
-                            <input type="number" step="0.5" min="0" placeholder="Kg" value="${valW}" ${!isStarted ? 'disabled' : ''} oninput="updateDraft('${wKey}', this.value)">
-                            <span style="color:#94a3b8; font-size:0.8rem;">kg</span>
-                            <input type="number" min="0" placeholder="Reps" value="${valR}" ${!isStarted ? 'disabled' : ''} oninput="updateDraft('${rKey}', this.value)">
-                            <span style="color:#94a3b8; font-size:0.8rem;">reps</span>
-                        </div>
-                    `;
-                }
-                html += `</div></div>`;
-            });
-
-            if (isStarted) {
-                html += `
-                    <div class="card" style="margin-top:1rem; border-color:#7c3aed; background:#2e1065;">
-                        <div style="font-weight:800; margin-bottom:0.35rem;">📈 Esfuerzo global de la sesión (sRPE)</div>
-                        <div style="font-size:0.8rem; color:#ddd6fe; margin-bottom:0.55rem;">
-                            1 = muy fácil · 5 = moderado · 8 = duro · 10 = máximo.
-                        </div>
-                        <select id="session-rpe" onchange="appState.sessionRPE=this.value; saveState()"
-                            style="width:100%; padding:0.7rem; border-radius:8px; background:#0f172a; color:#fff; border:1px solid #6d28d9;">
-                            <option value="">Selecciona el esfuerzo...</option>
-                            ${[1,2,3,4,5,6,7,8,9,10].map(v => `<option value="${v}" ${String(appState.sessionRPE)===String(v)?'selected':''}>${v}/10</option>`).join('')}
-                        </select>
-                    </div>
-                    <button class="success" onclick="finishWorkout('${currentDayTab}')" style="font-size:1.1rem; padding:1.1rem; margin-top:1rem; box-shadow:0 4px 14px rgba(34,197,94,0.4);">
-                        ✅ Finalizar y dejar que el Entrenador 4.0 evalúe la sesión
-                    </button>
-                `;
-            }
-
-            container.innerHTML = html;
-        }
-
-        function formatDuration(totalSeconds) {
-            const s=Math.max(0,Math.round(Number(totalSeconds)||0));
-            const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
-            return h>0 ? `${h}h ${String(m).padStart(2,'0')}m` : `${m}m ${String(sec).padStart(2,'0')}s`;
-        }
-
-        function getWorkoutElapsedSeconds() {
-            if (!appState.workoutStarted || !appState.workoutStartTime) return appState.workoutElapsedSeconds || 0;
-            return Math.max(0, Math.floor((Date.now()-appState.workoutStartTime)/1000));
-        }
-
-        function finishWorkout(currentDayTab) {
-            if (!appState.workoutStarted) return;
-
-            const { week: naturalWeek, cycle: naturalCycle } = getNaturalWeekAndCycle();
-            const currentCycle = appState.activeCycle || Math.max(naturalCycle, appState.cycleNumber);
-            const week = naturalCycle === currentCycle ? naturalWeek : naturalWeek;
-
-            const activeDay = appState.activeDay || currentDayTab;
-            const endTime = Date.now();
-            const durationSeconds = appState.workoutStartTime ? Math.max(0, Math.round((endTime - appState.workoutStartTime)/1000)) : (appState.workoutElapsedSeconds || 0);
-            const rutinaObj = getEvolvedWorkoutForCycle(activeDay, currentCycle);
-
-            let workoutRecord = {
-                id: Date.now(),
-                timestamp: new Date().toISOString(),
-                date: new Date().toLocaleDateString('es-ES') + ' ' +
-                      new Date().toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit'}),
-                dayTab: activeDay,
-                title: rutinaObj.name,
-                cycle: currentCycle,
-                week: week,
-                readinessScore: appState.readinessScore,
-                sessionRPE: Number(appState.sessionRPE) || 0,
-                durationSeconds,
-                durationText: formatDuration(durationSeconds),
-                exercises: []
-            };
-
-            rutinaObj.exercises.forEach(ex => {
-                let exerciseData = { id: ex.id, name: ex.name, muscle: ex.muscle, series: [] };
-
-                for(let s = 1; s <= ex.series; s++) {
-                    let wKey = `${currentDayTab}-w-${ex.id}-s${s}`;
-                    let rKey = `${currentDayTab}-r-${ex.id}-s${s}`;
-                    
-                    let w = appState.draftInputs[wKey] || 0;
-                    let r = appState.draftInputs[rKey] || 0;
-
-                    exerciseData.series.push({ serie: s, weight: parseFloat(w) || 0, reps: parseInt(r) || 0 });
-                }
-                workoutRecord.exercises.push(exerciseData);
-            });
-
-            const completedSeries = workoutRecord.exercises.reduce(
-                (total, ex) => total + ex.series.filter(s => s.reps > 0 && s.weight > 0).length, 0
-            );
-
-            if (completedSeries === 0) {
-                alert('⚠️ Introduce al menos una serie con peso y repeticiones antes de finalizar.');
-                return;
-            }
-
-            // EVALUAR CUMPLIMIENTO DE REPETICIONES Y AUTOMODIFICAR PESOS FUTUROS
-            evaluateWorkoutPerformance(workoutRecord);
-
-            appState.history.unshift(workoutRecord);
-            appState.workoutStarted = false;
-            appState.activeDay = null;
-            appState.activeCycle = null;
-            appState.workoutStartTime = null;
-            appState.workoutElapsedSeconds = 0;
-            appState.sessionRPE = '';
-            appState.draftInputs = {};
-
-            saveState();
-
-            const promoted = workoutRecord.engine?.promoted || 0;
-            const reduced = workoutRecord.engine?.reduced || 0;
-            alert(`🤖 Entrenador 4.0 completado. ${promoted} ejercicio(s) progresan, ${reduced} reajuste(s), y el resto queda estabilizado según rendimiento + fatiga + tendencia.`);
-            renderWorkout();
-            switchView('history');
-        }
-
-        function deleteWorkout(index) {
-            if (confirm("¿Borrar este entreno del historial?")) {
-                appState.history.splice(index, 1);
-                saveState();
-                renderHistory();
-                renderWorkout();
-            }
-        }
-
-        function renderHistory() {
-            const container = document.getElementById('history-content');
-            if(appState.history.length === 0) {
-                container.innerHTML = `<p style="color:var(--text-light); font-size:0.9rem;">Sin entrenamientos registrados aún.</p>`;
-                return;
-            }
-
-            let html = '';
-            appState.history.forEach((item, index) => {
-                const engine = item.engine || {};
-                const engineSummary = engine.version === 4
-                    ? `🤖 Motor 4.0 · Readiness ${escapeHtml(item.readinessScore ?? 3)}/5 · sRPE ${escapeHtml(item.sessionRPE || '—')}/10 · ↑${engine.promoted || 0} · →${engine.maintained || 0} · ↓${engine.reduced || 0}`
-                    : '🤖 Motor clásico / registro anterior';
-
-                html += `
-                    <div class="card history-item">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                            <div>
-                                <strong style="color:#60a5fa; font-size:1.05rem;">${escapeHtml(item.date)}</strong><br>
-                                <span style="font-size:0.9rem; font-weight:bold;">${escapeHtml(item.title)}</span>
-                                <div style="margin-top:0.3rem;"><span class="badge">Ciclo ${escapeHtml(item.cycle)} - Semana ${escapeHtml(item.week)}</span></div>
-                                <div style="margin-top:0.4rem; color:#c4b5fd; font-size:0.78rem;">${engineSummary}</div><div style="margin-top:0.35rem;"><span class="meta-pill duration-pill">⏱️ Duración: ${escapeHtml(item.durationText || formatDuration(item.durationSeconds || 0))}</span></div>
-                            </div>
-                            <button class="btn-sm warning" onclick="deleteWorkout(${index})">🗑️ Borrar</button>
-                        </div>
-                        <div style="margin-top: 0.75rem; font-size: 0.85rem; border-top:1px solid var(--border); padding-top:0.5rem;">
-                
-                `;
-                item.exercises.forEach(ex => {
-                    html += `
-                        <div style="margin-bottom:0.5rem;">
-                            <strong style="color:#e2e8f0;">${escapeHtml(ex.name)}:</strong> 
-                    `;
-                    ex.series.forEach(sr => {
-                        html += `<span style="color:#94a3b8; background:#0f172a; padding:0.1rem 0.3rem; border-radius:4px; font-family:monospace; margin-right:0.2rem;">S${escapeHtml(sr.serie)}: ${escapeHtml(sr.weight)}kg × ${escapeHtml(sr.reps)}</span> `;
-                    });
-                    if (ex.evaluation) {
-                        html += `<div style="margin-top:0.25rem;"><span class="feedback-badge ${ex.evaluation.badgeClass}">${escapeHtml(ex.evaluation.text)}</span></div>`;
-                    }
-                    html += `</div>`;
-                });
-                html += `</div></div>`;
-            });
-            container.innerHTML = html;
-        }
-
-        function updateStartDate(newDate) {
-            if(newDate) {
-                appState.startDate = newDate;
-                saveState();
-                renderWorkout();
-            }
-        }
-
-        /* TIMER DE DESCANSO 4.0 — basado en timestamp para evitar errores al bloquear pantalla */
-        let timerInterval=null, timerSeconds=0, timerTotalSeconds=0, timerEndAt=0, timerPaused=false;
-        function startRestTimer(sec, exName='') {
-            stopRestTimer(true);
-            timerTotalSeconds=Math.max(1,Number(sec)||60); timerSeconds=timerTotalSeconds; timerEndAt=Date.now()+timerSeconds*1000; timerPaused=false;
-            document.getElementById('timer-bar').style.display='block';
-            document.getElementById('timer-label').innerText=exName?`Descanso: ${exName}`:'Descanso';
-            document.getElementById('timer-pause-btn').innerText='Pausar';
-            updateTimerDisplay();
-            timerInterval=setInterval(tickRestTimer,250);
-        }
-        function tickRestTimer(){
-            if(timerPaused) return;
-            timerSeconds=Math.max(0,Math.ceil((timerEndAt-Date.now())/1000)); updateTimerDisplay();
-            if(timerSeconds<=0){
-                clearInterval(timerInterval); timerInterval=null; timerSeconds=0; timerPaused=false; updateTimerDisplay();
-                if(navigator.vibrate) navigator.vibrate([180,80,180]);
-                playTimerBeep();
-                setTimeout(()=>{ const bar=document.getElementById('timer-bar'); if(bar) bar.style.display='none'; },1200);
-            }
-        }
-        function adjustRestTimer(delta){
-            if(!timerInterval || timerSeconds<=0) return;
-            const next=Math.max(5,timerSeconds+(Number(delta)||0)); timerSeconds=next;
-            if(!timerPaused) timerEndAt=Date.now()+next*1000;
-            else timerEndAt=Date.now()+next*1000;
-            timerTotalSeconds=Math.max(timerTotalSeconds,next); updateTimerDisplay();
-        }
-        function addTimerSeconds(s){ adjustRestTimer(s); }
-        function toggleRestTimerPause(){
-            if(!timerInterval || timerSeconds<=0) return;
-            timerPaused=!timerPaused;
-            if(!timerPaused) timerEndAt=Date.now()+timerSeconds*1000;
-            document.getElementById('timer-pause-btn').innerText=timerPaused?'Reanudar':'Pausar';
-        }
-        function stopRestTimer(silent=false){
-            clearInterval(timerInterval); timerInterval=null; timerPaused=false; timerSeconds=0; timerTotalSeconds=0; timerEndAt=0;
-            const bar=document.getElementById('timer-bar'); if(bar) bar.style.display='none';
-            if(!silent) updateTimerDisplay();
-        }
-        function playTimerBeep(){
-            try { const C=window.AudioContext||window.webkitAudioContext; if(!C)return; const c=new C(),o=c.createOscillator(),g=c.createGain(); o.frequency.value=880; g.gain.value=.06; o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime+.18); } catch(e){}
-        }
-        function updateTimerDisplay(){
-            const m=Math.floor(timerSeconds/60), sec=timerSeconds%60;
-            const el=document.getElementById('timer-count'); if(el) el.innerText=`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
-            const fill=document.getElementById('timer-progress-fill'); if(fill) fill.style.width=(timerTotalSeconds?Math.max(0,Math.min(100,(1-timerSeconds/timerTotalSeconds)*100)):0)+'%';
-        }
-
-        function switchView(viewName) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-            document.getElementById(`view-${viewName}`).classList.add('active');
-            document.getElementById(`nav-${viewName}`).classList.add('active');
-            if(viewName === 'history') renderHistory();
-            if(viewName === 'workout') renderWorkout();
-        }
-
         function resetApp() {
-            if(confirm("¿Borrar todo el historial y reiniciar el programa?")) {
-                clearInterval(timerInterval);
+            if (confirm("¿Seguro que deseas borrar todos los datos y reiniciar la aplicación?")) {
                 localStorage.removeItem(STORAGE_KEY);
-                location.reload();
+                appState = normalizeState(null);
+                saveState();
+                updateCycleHeader();
+                renderWorkout();
             }
         }
 
-        renderWorkout();
+        // Inicialización de la app al cargar
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCycleHeader();
+            renderWorkout();
+        });
     </script>
 </body>
 </html>
