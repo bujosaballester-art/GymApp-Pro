@@ -239,12 +239,15 @@
         }
         .view { display: none; }
         .view.active { display: block; }
+        
         .history-item { 
             border-left: 4px solid var(--primary); 
             padding: 1rem; 
             margin-bottom: 1rem;
             background: var(--card-bg);
             border-radius: 8px;
+            border: 1px solid var(--border);
+            border-left-width: 4px;
         }
         .history-meta-badge {
             display: inline-flex;
@@ -257,6 +260,29 @@
             color: #e2e8f0;
             border: 1px solid var(--border);
         }
+        .history-exercise-block {
+            margin-top: 0.75rem;
+            padding-top: 0.6rem;
+            border-top: 1px dashed var(--border);
+        }
+        .history-exercise-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #60a5fa;
+            margin-bottom: 0.4rem;
+        }
+        .history-set-pill {
+            display: inline-block;
+            background: #0f172a;
+            padding: 0.25rem 0.5rem;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            border: 1px solid var(--border);
+            margin-right: 0.4rem;
+            margin-bottom: 0.4rem;
+            color: #cbd5e1;
+        }
+
         .timer-progress { height:6px; background:#1e293b; border-radius:999px; overflow:hidden; margin-top:.45rem; }
         .timer-progress > div { height:100%; width:0%; background:#38bdf8; transition:width .25s linear; }
         .timer-controls { display:flex; flex-wrap:wrap; gap:.4rem; justify-content:flex-end; }
@@ -797,17 +823,43 @@
             appState.history.forEach((item, index) => {
                 const durationText = item.duration ? item.duration : 'Sin datos';
 
+                let exercisesHTML = '';
+                if (item.exercises && item.exercises.length > 0) {
+                    item.exercises.forEach(ex => {
+                        let setsHTML = '';
+                        if (ex.sets && ex.sets.length > 0) {
+                            ex.sets.forEach((set, sIdx) => {
+                                setsHTML += `<span class="history-set-pill">S${sIdx + 1}: <strong>${set.weight} kg</strong> × ${set.reps} reps</span>`;
+                            });
+                        } else {
+                            setsHTML = `<span style="font-size:0.8rem; color:var(--text-light);">Sin datos de series</span>`;
+                        }
+
+                        exercisesHTML += `
+                            <div class="history-exercise-block">
+                                <div class="history-exercise-title">${ex.name}</div>
+                                <div>${setsHTML}</div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    exercisesHTML = `<p style="font-size:0.85rem; color:var(--text-light); margin-top:0.5rem;">Sin registro detallado de ejercicios.</p>`;
+                }
+
                 html += `
                     <div class="history-item">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.6rem;">
                             <div>
-                                <strong style="font-size:1.05rem; display:block; margin-bottom:0.3rem;">${item.name}</strong>
+                                <strong style="font-size:1.05rem; display:block; margin-bottom:0.3rem; color:#f8fafc;">${item.name}</strong>
                                 <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
                                     <span class="history-meta-badge">📅 ${item.date}</span>
                                     <span class="history-meta-badge" style="color:#38bdf8;">⏱️ ${durationText}</span>
                                 </div>
                             </div>
                             <button class="btn-sm warning" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="deleteHistoryItem(${index})" title="Eliminar registro">🗑️</button>
+                        </div>
+                        <div class="history-details">
+                            ${exercisesHTML}
                         </div>
                     </div>
                 `;
