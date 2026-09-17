@@ -176,7 +176,7 @@
         }
         .series-row label { flex: 0 0 52px; color: #cbd5e1; font-weight: 500; }
         .series-row input {
-            width: 68px;
+            width: 75px;
             min-width: 0;
             padding: 0.5rem;
             border: 1px solid var(--border);
@@ -333,7 +333,6 @@
     </nav>
 
     <script>
-        // MATRIZ DE EVOLUCIÓN DE EJERCICIOS POR PATRÓN DE MOVIMIENTO
         const exerciseEvolutionTree = {
             empuje_plano: [
                 { id: 'press_banca', name: 'Press de Banca Plano con Barra', muscle: 'Pectoral Mayor', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 150, baseWeight: 50, tempo: '3-0-1-0', steps: ['Retrae escápulas.', 'Baja la barra al esternón.', 'Empuja explosivo.'] },
@@ -505,7 +504,7 @@
         }
 
         // ==========================================
-        // SISTEMA DE CRONÓMETRO FLOTANTE (SIN SONIDO)
+        // SISTEMA DE CRONÓMETRO FLOTANTE
         // ==========================================
         let timerInterval = null;
         let timerSecondsLeft = 0;
@@ -527,7 +526,7 @@
                     timerSecondsLeft--;
                     updateTimerDisplay();
                     if (timerSecondsLeft <= 0) {
-                        stopRestTimer(); // Finalización silenciosa sin audio
+                        stopRestTimer();
                     }
                 }
             }, 1000);
@@ -628,8 +627,7 @@
                     const setData = exDraft[i] || {};
                     const weight = parseFloat(setData.weight) || ex.calculatedBaseWeight;
                     const reps = parseInt(setData.reps, 10) || ex.minReps;
-                    const rir = parseInt(setData.rir, 10) || 2;
-                    completedSets.push({ weight, reps, rir });
+                    completedSets.push({ weight, reps });
                     if (weight > maxWeight) maxWeight = weight;
                 }
 
@@ -639,7 +637,6 @@
                     sets: completedSets
                 });
 
-                // Auto-progresión básica para el siguiente ciclo
                 const key = getWeightKey(ex.id, cycle + 1);
                 appState.cycleCalculatedWeights[key] = maxWeight + 2.5;
             });
@@ -648,7 +645,6 @@
             appState.workoutStarted = false;
             appState.draftInputs = {};
             
-            // Avanzar automáticamente al siguiente día de la rutina
             const currentIdx = rotationOrder.indexOf(currentDay);
             appState.activeDay = rotationOrder[(currentIdx + 1) % rotationOrder.length];
 
@@ -698,14 +694,12 @@
                     const setData = exDraft[s] || {};
                     const weightVal = setData.weight !== undefined ? setData.weight : ex.calculatedBaseWeight;
                     const repsVal = setData.reps !== undefined ? setData.reps : ex.minReps;
-                    const rirVal = setData.rir !== undefined ? setData.rir : 2;
 
                     seriesRows += `
                         <div class="series-row">
                             <label>S${s + 1}</label>
                             <input type="number" step="0.5" value="${weightVal}" placeholder="kg" ${!appState.workoutStarted ? 'disabled' : ''} onchange="onInputChange('${ex.id}', ${s}, 'weight', this.value)"> kg
                             <input type="number" value="${repsVal}" placeholder="reps" ${!appState.workoutStarted ? 'disabled' : ''} onchange="onInputChange('${ex.id}', ${s}, 'reps', this.value)"> reps
-                            <input type="number" value="${rirVal}" placeholder="RIR" ${!appState.workoutStarted ? 'disabled' : ''} onchange="onInputChange('${ex.id}', ${s}, 'rir', this.value)"> RIR
                             ${appState.workoutStarted ? `<button class="btn-sm secondary" style="margin-left:auto;" onclick="startRestTimer(${ex.defaultRest}, '${ex.name}')">⏱️ Rest (${ex.defaultRest}s)</button>` : ''}
                         </div>
                     `;
@@ -751,6 +745,14 @@
             container.innerHTML = html;
         }
 
+        function deleteHistoryItem(index) {
+            if (confirm("¿Seguro que deseas eliminar este entrenamiento del historial?")) {
+                appState.history.splice(index, 1);
+                saveState();
+                renderHistory();
+            }
+        }
+
         function renderHistory() {
             const container = document.getElementById('history-content');
             if (!appState.history || appState.history.length === 0) {
@@ -759,10 +761,10 @@
             }
 
             let html = '';
-            appState.history.forEach(item => {
+            appState.history.forEach((item, index) => {
                 let exercisesHTML = '';
                 item.exercises.forEach(ex => {
-                    const setsStr = ex.sets.map((s, idx) => `S${idx+1}: ${s.weight}kg x ${s.reps} (RIR ${s.rir})`).join(' | ');
+                    const setsStr = ex.sets.map((s, idx) => `S${idx+1}: ${s.weight}kg x ${s.reps}`).join(' | ');
                     exercisesHTML += `<p style="font-size:0.85rem; margin:0.3rem 0;"><strong>${ex.name}:</strong> ${setsStr}</p>`;
                 });
 
@@ -770,7 +772,10 @@
                     <div class="history-item">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
                             <strong>${item.name}</strong>
-                            <small style="color:var(--text-light);">${item.date}</small>
+                            <div style="display:flex; align-items:center; gap:0.5rem;">
+                                <small style="color:var(--text-light);">${item.date}</small>
+                                <button class="btn-sm warning" style="padding:0.2rem 0.5rem; font-size:0.75rem;" onclick="deleteHistoryItem(${index})" title="Eliminar registro">🗑️</button>
+                            </div>
                         </div>
                         <p style="font-size:0.8rem; color:#60a5fa; margin:0 0 0.5rem 0;">Ciclo ${item.cycle || 1} - Semana ${item.week || 1}</p>
                         ${exercisesHTML}
@@ -839,7 +844,6 @@
             }
         }
 
-        // Inicialización de la app al cargar
         document.addEventListener('DOMContentLoaded', () => {
             updateCycleHeader();
             renderWorkout();
