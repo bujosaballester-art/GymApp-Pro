@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GymApp Pro - Dynamic Auto-Overload Edition</title>
+    <title>GymApp Pro 4.0 — Entrenador Personal Adaptativo</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -299,6 +299,24 @@
             padding: 1rem; 
             margin-bottom: 1rem;
         }
+
+        /* ===== GYM APP 4.0 ===== */
+        .coach4-panel { background:linear-gradient(135deg,#172554,#312e81); border-color:#6366f1; }
+        .coach4-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.65rem; }
+        .coach4-stat { background:#0f172a; border:1px solid #475569; border-radius:10px; padding:.7rem; }
+        .coach4-stat strong { display:block; font-size:1.1rem; color:#f8fafc; }
+        .coach4-stat span { font-size:.75rem; color:#94a3b8; }
+        .exercise-illustration { display:flex; justify-content:center; align-items:center; min-height:150px; margin-bottom:.8rem; background:#020617; border:1px solid #334155; border-radius:10px; overflow:hidden; }
+        .exercise-illustration svg { width:100%; max-width:360px; height:150px; }
+        .tech-columns { display:grid; grid-template-columns:minmax(0,1fr); gap:.8rem; }
+        .coach-note { background:#172554; border-left:4px solid #60a5fa; padding:.75rem; border-radius:8px; font-size:.82rem; }
+        .timer-progress { height:6px; background:#1e293b; border-radius:999px; overflow:hidden; margin-top:.45rem; }
+        .timer-progress > div { height:100%; width:0%; background:#38bdf8; transition:width .25s linear; }
+        .timer-controls { display:flex; flex-wrap:wrap; gap:.4rem; justify-content:flex-end; }
+        .timer-controls .btn-sm { min-width:58px; }
+        .duration-pill { background:#0f766e; color:#ccfbf1; border:1px solid #14b8a6; }
+        .coach-decision { padding:.65rem .75rem; border-radius:8px; background:#0f172a; border:1px solid #475569; margin-top:.55rem; }
+        @media (min-width:560px){ .coach4-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } .tech-columns { grid-template-columns:1fr 1fr; } }
     </style>
 </head>
 <body>
@@ -355,17 +373,20 @@
         </div>
     </div>
 
-    <!-- CRONÓMETRO FLOTANTE -->
+    <!-- CRONÓMETRO FLOTANTE 4.0 -->
     <div id="timer-bar">
-        <div class="timer-container">
-            <div>
-                <small id="timer-label" style="color:#94a3b8; display:block; font-size:0.8rem;">Descanso Recomendado</small>
-                <span id="timer-count" class="timer-display">00:00</span>
+        <div class="timer-container" style="display:block;">
+            <div style="display:flex;justify-content:space-between;gap:.7rem;align-items:center;">
+                <div><small id="timer-label" style="color:#94a3b8; display:block; font-size:0.8rem;">Descanso</small>
+                <span id="timer-count" class="timer-display">00:00</span></div>
+                <div class="timer-controls">
+                    <button class="btn-sm secondary" onclick="adjustRestTimer(-15)">−15</button>
+                    <button class="btn-sm secondary" onclick="adjustRestTimer(15)">+15</button>
+                    <button class="btn-sm secondary" onclick="toggleRestTimerPause()" id="timer-pause-btn">Pausar</button>
+                    <button class="btn-sm warning" onclick="stopRestTimer()">Saltar</button>
+                </div>
             </div>
-            <div style="display:flex; gap:0.4rem;">
-                <button class="btn-sm secondary" onclick="addTimerSeconds(30)">+30s</button>
-                <button class="btn-sm warning" onclick="stopRestTimer()">Saltar</button>
-            </div>
+            <div class="timer-progress"><div id="timer-progress-fill"></div></div>
         </div>
     </div>
 
@@ -415,6 +436,19 @@
                 { id: 'peso_muerto_rum', name: 'Peso Muerto Rumano', muscle: 'Isquios / Glúteo', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 120, baseWeight: 50, tempo: '3-1-1-0', steps: ['Cadera hacia atrás.', 'Barra pegada a piernas.'] },
                 { id: 'curl_femoral', name: 'Curl Femoral Tumbado', muscle: 'Isquios Aislamiento', series: 4, minReps: 10, maxReps: 12, targetReps: '10-12 reps', defaultRest: 90, baseWeight: 35, tempo: '2-1-1-0', steps: ['Contracción fuerte en la flexión.'] }
             ],
+
+            tiron_accesorio: [
+                { id:'pullover_polea', name:'Pullover en Polea Alta', muscle:'Dorsal Ancho', series:3, minReps:10, maxReps:12, targetReps:'10-12 reps', defaultRest:75, baseWeight:20, tempo:'2-1-1-0', steps:['Mantén brazos ligeramente flexionados.','Lleva la barra hacia los muslos sin convertirlo en un jalón.','Controla el estiramiento.'] },
+                { id:'remo_pecho_apoyado', name:'Remo con Pecho Apoyado', muscle:'Espalda Media', series:3, minReps:8, maxReps:12, targetReps:'8-12 reps', defaultRest:90, baseWeight:30, tempo:'2-1-1-0', steps:['Pecho estable contra el apoyo.','Lleva los codos hacia atrás.','Evita encoger los hombros.'] }
+            ],
+            gluteo_principal: [
+                { id:'hip_thrust', name:'Hip Thrust con Barra', muscle:'Glúteo', series:3, minReps:8, maxReps:12, targetReps:'8-12 reps', defaultRest:120, baseWeight:60, tempo:'2-1-1-0', steps:['Barra estable sobre la cadera.','Eleva hasta extensión de cadera sin hiperextender la espalda.','Pausa arriba.'] },
+                { id:'zancada_bulgara', name:'Sentadilla Búlgara', muscle:'Glúteo / Cuádriceps', series:3, minReps:8, maxReps:12, targetReps:'8-12 reps', defaultRest:105, baseWeight:12, tempo:'3-0-1-0', steps:['Pie delantero estable.','Desciende verticalmente con control.','Empuja con toda la planta del pie.'] }
+            ],
+            gemelo_principal: [
+                { id:'gemelo_de_pie', name:'Elevación de Gemelos de Pie', muscle:'Gemelos', series:3, minReps:10, maxReps:15, targetReps:'10-15 reps', defaultRest:60, baseWeight:40, tempo:'2-1-1-1', steps:['Baja hasta sentir estiramiento.','Sube a máxima flexión plantar.','Pausa arriba.'] },
+                { id:'gemelo_sentado', name:'Elevación de Gemelos Sentado', muscle:'Sóleo / Gemelos', series:3, minReps:12, maxReps:15, targetReps:'12-15 reps', defaultRest:60, baseWeight:30, tempo:'2-1-1-1', steps:['Mantén la rodilla estable.','Busca recorrido completo.','No rebotes abajo.'] }
+            ],
             biceps_principal: [
                 { id: 'curl_barra', name: 'Curl de Bíceps con Barra Z', muscle: 'Bíceps', series: 3, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 75, baseWeight: 20, tempo: '2-0-1-0', steps: ['Codos pegados al cuerpo.', 'Sube sin balancear el torso.', 'Controla la bajada.'] },
                 { id: 'curl_mancuernas', name: 'Curl Alterno con Mancuernas', muscle: 'Bíceps', series: 3, minReps: 10, maxReps: 12, targetReps: '10-12 reps', defaultRest: 75, baseWeight: 10, tempo: '2-0-1-0', steps: ['Supina durante la subida.', 'Evita mover el hombro.'] }
@@ -434,26 +468,10 @@
         };
 
         const rutinaBaseStructure = {
-            'A': {
-                name: 'Sesión A: Empuje (Pecho + Tríceps)',
-                focus: 'Hipertrofia Torso Anterior',
-                slots: ['empuje_plano', 'empuje_inclinado', 'pecho_aislado', 'triceps_principal', 'triceps_accesorio']
-            },
-            'B': {
-                name: 'Sesión B: Tirón (Espalda + Bíceps)',
-                focus: 'Amplitud y Grosor Dorsal',
-                slots: ['tiron_vertical', 'tiron_horizontal', 'tiron_horizontal', 'biceps_principal', 'biceps_principal']
-            },
-            'C': {
-                name: 'Sesión C: Tren Inferior (Pierna)',
-                focus: 'Fuerza e Hipertrofia de Pierna',
-                slots: ['cuadriceps_principal', 'isquios_principal', 'cuadriceps_principal', 'isquios_principal']
-            },
-            'D': {
-                name: 'Sesión D: Hombro & Core',
-                focus: 'Deltoides 3D y Estabilidad',
-                slots: ['hombro_principal', 'hombro_aislado', 'tiron_horizontal', 'core_principal']
-            }
+            'A': { name:'Sesión A: Empuje (Pecho + Tríceps)', focus:'Pecho y tríceps', slots:['empuje_plano','empuje_inclinado','pecho_aislado','triceps_principal','triceps_accesorio'] },
+            'B': { name:'Sesión B: Tirón (Espalda + Bíceps)', focus:'Amplitud, grosor y bíceps', slots:['tiron_vertical','tiron_horizontal','tiron_accesorio','biceps_principal'] },
+            'C': { name:'Sesión C: Tren Inferior', focus:'Cuádriceps, cadena posterior y gemelos', slots:['cuadriceps_principal','isquios_principal','gluteo_principal','gemelo_principal'] },
+            'D': { name:'Sesión D: Hombro & Core', focus:'Deltoides, salud escapular y core', slots:['hombro_principal','hombro_aislado','core_principal'] }
         };
 
         const rotationOrder = ['A', 'B', 'C', 'D'];
@@ -472,7 +490,10 @@
             activeCycle: null,
             readinessScore: 3,
             sessionRPE: '',
-            draftInputs: {}
+            draftInputs: {},
+            workoutStartTime: null,
+            workoutElapsedSeconds: 0,
+            coachV4: { version: 4, reports: [] }
         };
 
         function normalizeState(raw) {
@@ -493,7 +514,10 @@
                 state.startDate = defaultAppState.startDate;
             }
             state.cycleNumber = Math.max(1, parseInt(state.cycleNumber, 10) || 1);
-            state.progressionEngineVersion = 3;
+            state.progressionEngineVersion = 4;
+            state.coachV4 = source.coachV4 && typeof source.coachV4 === 'object' ? source.coachV4 : {version:4,reports:[]};
+            state.workoutStartTime = Number.isFinite(Number(source.workoutStartTime)) ? Number(source.workoutStartTime) : null;
+            state.workoutElapsedSeconds = Math.max(0, Number(source.workoutElapsedSeconds) || 0);
             state.readinessScore = Math.min(5, Math.max(1, parseInt(state.readinessScore, 10) || 3));
             state.sessionRPE = state.sessionRPE === '' ? '' : Math.min(10, Math.max(1, parseInt(state.sessionRPE, 10) || 1));
 
@@ -553,28 +577,26 @@
             return getStoredWeight(exTemplate, cycle);
         }
 
-        function getEvolvedWorkoutForCycle(dayTab, currentCycle) {
+        function getEvolvedWorkoutForCycle(dayTab, currentCycle, weekOverride = null) {
             const dayStructure = rutinaBaseStructure[dayTab];
-            if (!dayStructure) return { name: 'Sesión no disponible', focus: '', exercises: [] };
-
+            if (!dayStructure) return { name:'Sesión no disponible', focus:'', exercises:[] };
+            const week = Number(weekOverride) || getNaturalWeekAndCycle().week;
+            const used = new Set();
             const exercises = [];
-
-            dayStructure.slots.forEach((slotKey) => {
-                const evolutionOptions = exerciseEvolutionTree[slotKey] || [];
-                if (!evolutionOptions.length) return;
-
-                const evoIndex = (currentCycle - 1) % evolutionOptions.length;
-                const templateEx = { ...evolutionOptions[evoIndex] };
-
+            dayStructure.slots.forEach(slotKey => {
+                const options = exerciseEvolutionTree[slotKey] || [];
+                if (!options.length) return;
+                // Rotación semanal dentro de cada patrón, pero jamás repetimos el mismo ejercicio dentro de la sesión.
+                let chosen = options[(week - 1) % options.length];
+                if (used.has(chosen.id)) {
+                    chosen = options.find(x => !used.has(x.id)) || chosen;
+                }
+                used.add(chosen.id);
+                const templateEx = { ...chosen };
                 templateEx.calculatedBaseWeight = calculateEvolvedWeightForExercise(templateEx, currentCycle);
                 exercises.push(templateEx);
             });
-
-            return {
-                name: dayStructure.name,
-                focus: dayStructure.focus,
-                exercises
-            };
+            return { name:dayStructure.name, focus:dayStructure.focus, exercises };
         }
 
         function findExerciseTemplate(exerciseId, exerciseName) {
@@ -627,12 +649,11 @@
             return Math.min(5, Math.max(0, Math.round(n)));
         }
 
-        function estimateE1RM(weight, reps, rir = 2) {
+        function estimateE1RM(weight, reps) {
             // Epley + ajuste sencillo por reps en reserva. No pretende sustituir
             // una prueba máxima; sirve para detectar tendencia con cargas submáximas.
             if (!(weight > 0) || !(reps > 0)) return 0;
-            const effectiveReps = reps + normalizeRIR(rir, 2);
-            return weight * (1 + effectiveReps / 30);
+            return weight * (1 + reps / 30);
         }
 
         function getHistoricalMetrics(exerciseId) {
@@ -650,7 +671,7 @@
                 );
                 if (!sets.length) return null;
 
-                const e1rms = sets.map(s => estimateE1RM(Number(s.weight), Number(s.reps), normalizeRIR(s.rir, 2)));
+                const e1rms = sets.map(s => estimateE1RM(Number(s.weight), Number(s.reps)));
                 const avgRIR = sets.reduce((a, s) => a + normalizeRIR(s.rir, 2), 0) / sets.length;
                 const avgReps = sets.reduce((a, s) => a + Number(s.reps), 0) / sets.length;
                 return {
@@ -693,156 +714,50 @@
         function evaluateWorkoutPerformance(workoutRecord) {
             const readiness = Number(workoutRecord.readinessScore) || 3;
             const sessionRPE = Number(workoutRecord.sessionRPE) || 0;
-
-            workoutRecord.engine = {
-                version: 3,
-                readiness,
-                sessionRPE,
-                decisions: 0,
-                promoted: 0,
-                maintained: 0,
-                reduced: 0
-            };
-
+            workoutRecord.engine = { version:4, readiness, sessionRPE, decisions:0, promoted:0, maintained:0, reduced:0, deload:false };
             workoutRecord.exercises.forEach(recordedEx => {
                 const template = findExerciseTemplate(recordedEx.id, recordedEx.name);
                 if (!template) return;
-
-                const minR = Number(template.minReps) || 6;
-                const maxR = Number(template.maxReps) || 8;
-                const targetMid = (minR + maxR) / 2;
-
-                const validSeries = recordedEx.series.filter(s =>
-                    Number.isFinite(Number(s.reps)) && Number(s.reps) > 0 &&
-                    Number.isFinite(Number(s.weight)) && Number(s.weight) > 0
-                );
-
-                if (!validSeries.length) {
-                    recordedEx.evaluation = {
-                        status: 'NO_DATA',
-                        text: 'ℹ️ Sin datos válidos: no se modifica la carga.',
-                        badgeClass: 'badge-maintained'
-                    };
-                    return;
+                const minR = Number(template.minReps)||6, maxR = Number(template.maxReps)||8;
+                const valid = recordedEx.series.filter(s=>Number(s.reps)>0 && Number(s.weight)>0);
+                if (!valid.length) { recordedEx.evaluation={status:'NO_DATA',text:'ℹ️ Sin datos válidos: no se modifica la carga.',badgeClass:'badge-maintained'}; return; }
+                const reps=valid.map(s=>Number(s.reps)), weights=valid.map(s=>Number(s.weight));
+                const avgReps=reps.reduce((a,b)=>a+b,0)/reps.length;
+                const consistency=1-(Math.max(...reps)-Math.min(...reps))/Math.max(1,maxR);
+                const e1rm=Math.max(...valid.map(s=>estimateE1RM(Number(s.weight),Number(s.reps),2)));
+                const history=getHistoricalMetrics(template.id);
+                const key=getWeightKey(template.id,workoutRecord.cycle);
+                const current=getStoredWeight(template,workoutRecord.cycle)||Math.max(...weights);
+                const inc=getProgressionIncrement(template);
+                const lowReady=readiness<=2, highRPE=sessionRPE>=9, veryHighRPE=sessionRPE>=10;
+                const poorConsistency=consistency<0.55;
+                const trendDown=history.sessions>=2 && history.trendPct<=-3;
+                const trendUp=history.sessions>=2 && history.trendPct>=3;
+                let status='MAINTAINED', next=current, text=`👍 Mantén ${current} kg.`;
+                if (workoutRecord.week===6) {
+                    next=current; status='DELOAD'; workoutRecord.engine.deload=true;
+                    text=`🔄 Descarga: ${current} kg queda como referencia. El rendimiento de esta semana no altera la progresión.`;
+                } else if (veryHighRPE || (highRPE && avgReps<maxR)) {
+                    status='HOLD_FATIGUE'; text=`🧠 Fatiga alta: mantén ${current} kg y consolida.`;
+                } else if (avgReps<minR) {
+                    const reduction=(trendDown||history.consecutiveMisses>=1)?0.075:0.05;
+                    next=Math.max(0,roundToStep(current*(1-reduction),0.5)); status='REGRESSED';
+                    text=`⚠️ Por debajo del mínimo: próxima carga ${next} kg.`;
+                } else if (lowReady || poorConsistency || avgReps<maxR || highRPE) {
+                    status='MAINTAINED';
+                    const why=lowReady?'readiness bajo':poorConsistency?'series poco consistentes':highRPE?'sRPE alto':'aún puedes consolidar repeticiones';
+                    text=`👍 Mantén ${current} kg: ${why}.`;
+                } else {
+                    next=roundToStep(current+inc,0.5); status='PROMOTED';
+                    text=trendUp?`🚀 Progresión sólida: ${next} kg (+${inc} kg), con tendencia positiva.`:`🎯 Objetivo completo: ${next} kg (+${inc} kg).`;
                 }
-
-                const reps = validSeries.map(s => Number(s.reps));
-                const weights = validSeries.map(s => Number(s.weight));
-                const rirs = validSeries.map(s => normalizeRIR(s.rir, 2));
-                const avgReps = reps.reduce((a,b) => a+b, 0) / reps.length;
-                const avgRIR = rirs.reduce((a,b) => a+b, 0) / rirs.length;
-                const lastRIR = rirs[rirs.length - 1];
-                const consistency = 1 - (Math.max(...reps) - Math.min(...reps)) / Math.max(1, maxR);
-                const volume = validSeries.reduce((sum, s) => sum + Number(s.weight) * Number(s.reps), 0);
-                const e1rm = Math.max(...validSeries.map(s => estimateE1RM(Number(s.weight), Number(s.reps), normalizeRIR(s.rir, 2))));
-                const weightKey = getWeightKey(template.id, workoutRecord.cycle);
-                const stored = getStoredWeight(template, workoutRecord.cycle);
-                const currentWeight = stored > 0 ? stored : Math.max(...weights);
-                const increment = getProgressionIncrement(template);
-                const history = getHistoricalMetrics(template.id);
-
-                recordedEx.metrics = {
-                    avgReps: Number(avgReps.toFixed(2)),
-                    avgRIR: Number(avgRIR.toFixed(2)),
-                    lastRIR,
-                    consistency: Number(Math.max(0, consistency).toFixed(2)),
-                    volume: Number(volume.toFixed(1)),
-                    estimated1RM: Number(e1rm.toFixed(1)),
-                    trendPct: Number(history.trendPct.toFixed(2)),
-                    consecutiveMisses: history.consecutiveMisses,
-                    consecutiveSuccesses: history.consecutiveSuccesses
-                };
-
-                // Semana 6: descarga real. Se mantiene la carga BASE y se evita
-                // que el rendimiento deliberadamente reducido contamine el motor.
-                if (workoutRecord.week === 6) {
-                    appState.cycleCalculatedWeights[weightKey] = currentWeight;
-                    recordedEx.evaluation = {
-                        status: 'DELOAD',
-                        text: `🔄 Descarga: ${currentWeight} kg queda como carga base para el siguiente ciclo.`,
-                        badgeClass: 'badge-deload'
-                    };
-                    return;
-                }
-
-                // Factores de autorregulación.
-                const lowReadiness = readiness <= 2;
-                const highFatigue = sessionRPE >= 9;
-                const veryHighFatigue = sessionRPE >= 10;
-                const tooCloseToFailure = avgRIR < 1;
-                const controlledEffort = avgRIR >= 1 && avgRIR <= 3;
-                const targetReached = avgReps >= maxR;
-                const minimumReached = avgReps >= minR;
-                const poorConsistency = consistency < 0.55;
-                const trendDown = history.sessions >= 2 && history.trendPct <= -3;
-                const trendUp = history.sessions >= 2 && history.trendPct >= 3;
-
-                let status = 'MAINTAINED';
-                let newWeight = currentWeight;
-                let text = `👍 Mantienes ${currentWeight} kg.`;
-
-                // 1) Datos demasiado exigentes / técnica degradada:
-                // no castigamos automáticamente una mala sesión aislada.
-                if (veryHighFatigue || (tooCloseToFailure && avgReps < maxR)) {
-                    status = 'HOLD_FATIGUE';
-                    text = `🧠 Esfuerzo/fatiga alto. Mantén ${currentWeight} kg y prioriza recuperar rendimiento.`;
-                }
-                // 2) Readiness bajo: conservador aunque se haya llegado al rango.
-                else if (lowReadiness && targetReached) {
-                    status = 'MAINTAINED';
-                    text = `🟡 Readiness ${readiness}/5: cumpliste el rango, pero no subimos carga para no forzar progresión en un día de baja disponibilidad.`;
-                }
-                // 3) Fallo claro: reducir solo si hay señal suficiente.
-                else if (!minimumReached) {
-                    const reduction = history.consecutiveMisses >= 1 || trendDown ? 0.075 : 0.05;
-                    newWeight = Math.max(0, roundToStep(currentWeight * (1 - reduction), 0.5));
-                    status = 'REGRESSED';
-                    text = `⚠️ Rendimiento por debajo del mínimo. Próxima carga: ${newWeight} kg (${Math.round(reduction*100)}% menos).`;
-                }
-                // 4) Rango alcanzado pero sin condiciones para promover.
-                else if (!targetReached || !controlledEffort || poorConsistency || highFatigue) {
-                    status = 'MAINTAINED';
-                    const reason = highFatigue
-                        ? 'fatiga alta'
-                        : poorConsistency
-                            ? 'series poco consistentes'
-                            : avgRIR > 3
-                                ? 'demasiado margen en reserva'
-                                : 'aún no hay margen suficiente para subir';
-                    text = `👍 Mantén ${currentWeight} kg: ${reason}.`;
-                }
-                // 5) Promoción: exige máximo de reps + esfuerzo controlado +
-                // consistencia + readiness razonable. Si hay tendencia positiva,
-                // la promoción se considera especialmente sólida.
-                else {
-                    newWeight = roundToStep(currentWeight + increment, 0.5);
-                    status = 'PROMOTED';
-                    text = trendUp
-                        ? `🚀 Progresión sólida: ${newWeight} kg (+${increment} kg). Tendencia positiva de rendimiento.`
-                        : `🎯 Rango máximo con esfuerzo controlado: ${newWeight} kg (+${increment} kg).`;
-                }
-
-                // Protección adicional: dos sesiones fallidas seguidas no siguen
-                // recortando indefinidamente; se estabiliza en la nueva carga.
-                if (status === 'REGRESSED' && history.consecutiveMisses >= 2) {
-                    newWeight = roundToStep(currentWeight * 0.925, 0.5);
-                    text = `🛡️ Dos sesiones difíciles seguidas: reajuste conservador a ${newWeight} kg y después se vuelve a construir.`;
-                }
-
-                appState.cycleCalculatedWeights[weightKey] = newWeight;
-                recordedEx.evaluation = {
-                    status,
-                    text,
-                    badgeClass:
-                        status === 'PROMOTED' ? 'badge-promoted' :
-                        status === 'DELOAD' || status === 'REGRESSED' ? 'badge-deload' :
-                        'badge-maintained'
-                };
-
+                appState.cycleCalculatedWeights[key]=next;
+                recordedEx.metrics={avgReps:Number(avgReps.toFixed(2)),consistency:Number(Math.max(0,consistency).toFixed(2)),volume:Number(valid.reduce((a,s)=>a+Number(s.weight)*Number(s.reps),0).toFixed(1)),estimated1RM:Number(e1rm.toFixed(1)),trendPct:Number(history.trendPct.toFixed(2))};
+                recordedEx.evaluation={status,text,badgeClass:status==='PROMOTED'?'badge-promoted':(status==='DELOAD'||status==='REGRESSED'?'badge-deload':'badge-maintained')};
                 workoutRecord.engine.decisions++;
-                if (status === 'PROMOTED') workoutRecord.engine.promoted++;
-                if (status === 'MAINTAINED' || status === 'HOLD_FATIGUE') workoutRecord.engine.maintained++;
-                if (status === 'REGRESSED') workoutRecord.engine.reduced++;
+                if(status==='PROMOTED') workoutRecord.engine.promoted++;
+                else if(status==='REGRESSED') workoutRecord.engine.reduced++;
+                else workoutRecord.engine.maintained++;
             });
         }
 
@@ -857,7 +772,9 @@
             saveState();
 
             alert(`🚀 ¡Ciclo ${appState.cycleNumber} activado! Se renovarán las variantes de ejercicios.`);
-            renderWorkout();
+            setInterval(()=>{ const el=document.getElementById('live-workout-duration'); if(el && appState.workoutStarted) el.innerText=formatDuration(getWorkoutElapsedSeconds()); },1000);
+
+        renderWorkout();
         }
 
         function exportBackup() {
@@ -922,6 +839,8 @@
             const currentCycle = Math.max(naturalCycle, appState.cycleNumber);
 
             appState.workoutStarted = true;
+            appState.workoutStartTime = Date.now();
+            appState.workoutElapsedSeconds = 0;
             appState.activeDay = getAutoNextDay();
             appState.activeCycle = currentCycle;
             appState.draftInputs = {};
@@ -933,6 +852,8 @@
             if(confirm("¿Cancelar entrenamiento en curso?")) {
                 appState.workoutStarted = false;
                 appState.activeDay = null;
+                appState.workoutStartTime = null;
+                appState.workoutElapsedSeconds = 0;
                 appState.draftInputs = {};
                 saveState();
                 renderWorkout();
@@ -956,6 +877,18 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
+        }
+
+        function exerciseIllustration(ex) {
+            const id=String(ex.id||'').toLowerCase();
+            let pose='▱';
+            if(id.includes('sentadilla')||id.includes('prensa')||id.includes('zancada')) pose='◯';
+            else if(id.includes('press')||id.includes('fondos')) pose='↗';
+            else if(id.includes('remo')||id.includes('jalon')||id.includes('pullover')) pose='↘';
+            else if(id.includes('curl')||id.includes('triceps')) pose='↕';
+            else if(id.includes('gemelo')) pose='↥';
+            else if(id.includes('crunch')||id.includes('piernas')) pose='↶';
+            return `<div class="exercise-illustration" aria-label="Esquema visual de ${escapeHtml(ex.name)}"><svg viewBox="0 0 360 150" role="img"><rect x="0" y="0" width="360" height="150" fill="#020617"/><circle cx="180" cy="45" r="13" fill="none" stroke="#60a5fa" stroke-width="3"/><path d="M180 58 L180 105 M180 70 L145 82 M180 70 L215 82 M180 105 L155 130 M180 105 L205 130" fill="none" stroke="#e2e8f0" stroke-width="5" stroke-linecap="round"/><path d="M130 132 H230" stroke="#475569" stroke-width="4"/><text x="180" y="25" text-anchor="middle" fill="#94a3b8" font-size="12">ESQUEMA TÉCNICO</text><text x="180" y="143" text-anchor="middle" fill="#38bdf8" font-size="18" font-weight="700">${pose}</text></svg></div>`;
         }
 
         function renderWorkout() {
@@ -982,7 +915,7 @@
 
                 <div class="cycle-evo-card">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="color:#e9d5ff; font-weight:bold; font-size:0.9rem;">🤖 Motor Rep-Target de Progresión</span>
+                        <span style="color:#e9d5ff; font-weight:bold; font-size:0.9rem;">🤖 Entrenador Adaptativo 4.0</span>
                         <span class="badge" style="background:#581c87; color:#f3e8ff;">${week === 6 ? 'DESCARGA (60% Carga)' : 'FASE DE CARGA'}</span>
                     </div>
                     <p style="margin:0.4rem 0 0 0; font-size:0.8rem; color:#cbd5e1;">
@@ -1016,7 +949,7 @@
             } else {
                 html += `
                     <div class="card" style="display:flex; justify-content:space-between; align-items:center; background:#450a0a; border-color:#ef4444;">
-                        <span style="color:#fca5a5; font-size:0.88rem; font-weight:bold;">🔴 SESIÓN ${currentDayTab} EN CURSO</span>
+                        <span style="color:#fca5a5; font-size:0.88rem; font-weight:bold;">🔴 SESIÓN ${currentDayTab} EN CURSO · ⏱️ <span id="live-workout-duration">${formatDuration(getWorkoutElapsedSeconds())}</span></span>
                         <button onclick="cancelWorkout()" class="btn-sm warning">Cancelar</button>
                     </div>`;
             }
@@ -1038,12 +971,13 @@
                         </div>
 
                         <div id="tech-${ex.id}" class="tech-guide">
-                            <div class="trainer-tip-box">
+                            ${exerciseIllustration(ex)}
+                            <div class="tech-columns"><div class="trainer-tip-box">
                                 <div class="trainer-tip-title">⚡ Cadencia / Tempo: ${escapeHtml(ex.tempo)}</div>
                                 <ul class="tech-steps">
                                     ${ex.steps.map(s => `<li>${escapeHtml(s)}</li>`).join('')}
                                 </ul>
-                            </div>
+                            </div><div class="coach-note"><strong>🎯 Clave:</strong> usa el rango completo que puedas controlar, mantén la trayectoria estable y detén la serie si la técnica se degrada claramente.</div></div>
                         </div>
 
                         <div class="exercise-meta">
@@ -1058,7 +992,6 @@
                 for(let s = 1; s <= ex.series; s++) {
                     let wKey = `${currentDayTab}-w-${ex.id}-s${s}`;
                     let rKey = `${currentDayTab}-r-${ex.id}-s${s}`;
-                    let rirKey = `${currentDayTab}-rir-${ex.id}-s${s}`;
 
                     let valW = appState.draftInputs[wKey] !== undefined ? appState.draftInputs[wKey] : (isStarted ? currentBaseW : '');
                     let valR = appState.draftInputs[rKey] !== undefined ? appState.draftInputs[rKey] : '';
@@ -1071,8 +1004,6 @@
                             <span style="color:#94a3b8; font-size:0.8rem;">kg</span>
                             <input type="number" min="0" placeholder="Reps" value="${valR}" ${!isStarted ? 'disabled' : ''} oninput="updateDraft('${rKey}', this.value)">
                             <span style="color:#94a3b8; font-size:0.8rem;">reps</span>
-                            <input type="number" min="0" max="5" placeholder="RIR" value="${valRIR}" ${!isStarted ? 'disabled' : ''} oninput="updateDraft('${rirKey}', this.value)">
-                            <span style="color:#94a3b8; font-size:0.8rem;">RIR</span>
                         </div>
                     `;
                 }
@@ -1093,12 +1024,23 @@
                         </select>
                     </div>
                     <button class="success" onclick="finishWorkout('${currentDayTab}')" style="font-size:1.1rem; padding:1.1rem; margin-top:1rem; box-shadow:0 4px 14px rgba(34,197,94,0.4);">
-                        ✅ Finalizar y dejar que el Motor 3.0 evalúe la sesión
+                        ✅ Finalizar y dejar que el Entrenador 4.0 evalúe la sesión
                     </button>
                 `;
             }
 
             container.innerHTML = html;
+        }
+
+        function formatDuration(totalSeconds) {
+            const s=Math.max(0,Math.round(Number(totalSeconds)||0));
+            const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+            return h>0 ? `${h}h ${String(m).padStart(2,'0')}m` : `${m}m ${String(sec).padStart(2,'0')}s`;
+        }
+
+        function getWorkoutElapsedSeconds() {
+            if (!appState.workoutStarted || !appState.workoutStartTime) return appState.workoutElapsedSeconds || 0;
+            return Math.max(0, Math.floor((Date.now()-appState.workoutStartTime)/1000));
         }
 
         function finishWorkout(currentDayTab) {
@@ -1109,6 +1051,8 @@
             const week = naturalCycle === currentCycle ? naturalWeek : naturalWeek;
 
             const activeDay = appState.activeDay || currentDayTab;
+            const endTime = Date.now();
+            const durationSeconds = appState.workoutStartTime ? Math.max(0, Math.round((endTime - appState.workoutStartTime)/1000)) : (appState.workoutElapsedSeconds || 0);
             const rutinaObj = getEvolvedWorkoutForCycle(activeDay, currentCycle);
 
             let workoutRecord = {
@@ -1122,6 +1066,8 @@
                 week: week,
                 readinessScore: appState.readinessScore,
                 sessionRPE: Number(appState.sessionRPE) || 0,
+                durationSeconds,
+                durationText: formatDuration(durationSeconds),
                 exercises: []
             };
 
@@ -1156,6 +1102,8 @@
             appState.workoutStarted = false;
             appState.activeDay = null;
             appState.activeCycle = null;
+            appState.workoutStartTime = null;
+            appState.workoutElapsedSeconds = 0;
             appState.sessionRPE = '';
             appState.draftInputs = {};
 
@@ -1163,7 +1111,7 @@
 
             const promoted = workoutRecord.engine?.promoted || 0;
             const reduced = workoutRecord.engine?.reduced || 0;
-            alert(`🤖 Motor 3.0 completado. ${promoted} ejercicio(s) progresan, ${reduced} reajuste(s), y el resto queda estabilizado según reps + RIR + fatiga + tendencia.`);
+            alert(`🤖 Entrenador 4.0 completado. ${promoted} ejercicio(s) progresan, ${reduced} reajuste(s), y el resto queda estabilizado según rendimiento + fatiga + tendencia.`);
             renderWorkout();
             switchView('history');
         }
@@ -1187,8 +1135,8 @@
             let html = '';
             appState.history.forEach((item, index) => {
                 const engine = item.engine || {};
-                const engineSummary = engine.version === 3
-                    ? `🤖 Motor 3.0 · Readiness ${escapeHtml(item.readinessScore ?? 3)}/5 · sRPE ${escapeHtml(item.sessionRPE || '—')}/10 · ↑${engine.promoted || 0} · →${engine.maintained || 0} · ↓${engine.reduced || 0}`
+                const engineSummary = engine.version === 4
+                    ? `🤖 Motor 4.0 · Readiness ${escapeHtml(item.readinessScore ?? 3)}/5 · sRPE ${escapeHtml(item.sessionRPE || '—')}/10 · ↑${engine.promoted || 0} · →${engine.maintained || 0} · ↓${engine.reduced || 0}`
                     : '🤖 Motor clásico / registro anterior';
 
                 html += `
@@ -1198,7 +1146,7 @@
                                 <strong style="color:#60a5fa; font-size:1.05rem;">${escapeHtml(item.date)}</strong><br>
                                 <span style="font-size:0.9rem; font-weight:bold;">${escapeHtml(item.title)}</span>
                                 <div style="margin-top:0.3rem;"><span class="badge">Ciclo ${escapeHtml(item.cycle)} - Semana ${escapeHtml(item.week)}</span></div>
-                                <div style="margin-top:0.4rem; color:#c4b5fd; font-size:0.78rem;">${engineSummary}</div>
+                                <div style="margin-top:0.4rem; color:#c4b5fd; font-size:0.78rem;">${engineSummary}</div><div style="margin-top:0.35rem;"><span class="meta-pill duration-pill">⏱️ Duración: ${escapeHtml(item.durationText || formatDuration(item.durationSeconds || 0))}</span></div>
                             </div>
                             <button class="btn-sm warning" onclick="deleteWorkout(${index})">🗑️ Borrar</button>
                         </div>
@@ -1211,7 +1159,7 @@
                             <strong style="color:#e2e8f0;">${escapeHtml(ex.name)}:</strong> 
                     `;
                     ex.series.forEach(sr => {
-                        html += `<span style="color:#94a3b8; background:#0f172a; padding:0.1rem 0.3rem; border-radius:4px; font-family:monospace; margin-right:0.2rem;">S${escapeHtml(sr.serie)}: ${escapeHtml(sr.weight)}kg × ${escapeHtml(sr.reps)} · RIR ${escapeHtml(sr.rir ?? 2)}</span> `;
+                        html += `<span style="color:#94a3b8; background:#0f172a; padding:0.1rem 0.3rem; border-radius:4px; font-family:monospace; margin-right:0.2rem;">S${escapeHtml(sr.serie)}: ${escapeHtml(sr.weight)}kg × ${escapeHtml(sr.reps)}</span> `;
                     });
                     if (ex.evaluation) {
                         html += `<div style="margin-top:0.25rem;"><span class="feedback-badge ${ex.evaluation.badgeClass}">${escapeHtml(ex.evaluation.text)}</span></div>`;
@@ -1231,41 +1179,53 @@
             }
         }
 
-        /* TIMER DE DESCANSO */
-        let timerInterval = null, timerSeconds = 0;
-        function startRestTimer(sec, exName = '') {
-            clearInterval(timerInterval);
-            timerSeconds = sec;
-            document.getElementById('timer-bar').style.display = 'block';
-            if(exName) document.getElementById('timer-label').innerText = `Descanso: ${exName}`;
+        /* TIMER DE DESCANSO 4.0 — basado en timestamp para evitar errores al bloquear pantalla */
+        let timerInterval=null, timerSeconds=0, timerTotalSeconds=0, timerEndAt=0, timerPaused=false;
+        function startRestTimer(sec, exName='') {
+            stopRestTimer(true);
+            timerTotalSeconds=Math.max(1,Number(sec)||60); timerSeconds=timerTotalSeconds; timerEndAt=Date.now()+timerSeconds*1000; timerPaused=false;
+            document.getElementById('timer-bar').style.display='block';
+            document.getElementById('timer-label').innerText=exName?`Descanso: ${exName}`:'Descanso';
+            document.getElementById('timer-pause-btn').innerText='Pausar';
             updateTimerDisplay();
-            timerInterval = setInterval(() => {
-                timerSeconds--;
-                updateTimerDisplay();
-                if(timerSeconds <= 0) {
-                    clearInterval(timerInterval);
-                    timerInterval = null;
-                    timerSeconds = 0;
-                    alert("⏱️ ¡Tiempo de descanso finalizado!");
-                    document.getElementById('timer-bar').style.display = 'none';
-                }
-            }, 1000);
+            timerInterval=setInterval(tickRestTimer,250);
         }
-        function addTimerSeconds(s) {
-            if (!timerInterval || timerSeconds <= 0) return;
-            timerSeconds += Math.max(0, Number(s) || 0);
-            updateTimerDisplay();
+        function tickRestTimer(){
+            if(timerPaused) return;
+            timerSeconds=Math.max(0,Math.ceil((timerEndAt-Date.now())/1000)); updateTimerDisplay();
+            if(timerSeconds<=0){
+                clearInterval(timerInterval); timerInterval=null; timerSeconds=0; timerPaused=false; updateTimerDisplay();
+                if(navigator.vibrate) navigator.vibrate([180,80,180]);
+                playTimerBeep();
+                setTimeout(()=>{ const bar=document.getElementById('timer-bar'); if(bar) bar.style.display='none'; },1200);
+            }
         }
-
-        function stopRestTimer() {
-            clearInterval(timerInterval);
-            timerInterval = null;
-            timerSeconds = 0;
-            document.getElementById('timer-bar').style.display = 'none';
+        function adjustRestTimer(delta){
+            if(!timerInterval || timerSeconds<=0) return;
+            const next=Math.max(5,timerSeconds+(Number(delta)||0)); timerSeconds=next;
+            if(!timerPaused) timerEndAt=Date.now()+next*1000;
+            else timerEndAt=Date.now()+next*1000;
+            timerTotalSeconds=Math.max(timerTotalSeconds,next); updateTimerDisplay();
         }
-        function updateTimerDisplay() {
-            const m = Math.floor(timerSeconds / 60), s = timerSeconds % 60;
-            document.getElementById('timer-count').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        function addTimerSeconds(s){ adjustRestTimer(s); }
+        function toggleRestTimerPause(){
+            if(!timerInterval || timerSeconds<=0) return;
+            timerPaused=!timerPaused;
+            if(!timerPaused) timerEndAt=Date.now()+timerSeconds*1000;
+            document.getElementById('timer-pause-btn').innerText=timerPaused?'Reanudar':'Pausar';
+        }
+        function stopRestTimer(silent=false){
+            clearInterval(timerInterval); timerInterval=null; timerPaused=false; timerSeconds=0; timerTotalSeconds=0; timerEndAt=0;
+            const bar=document.getElementById('timer-bar'); if(bar) bar.style.display='none';
+            if(!silent) updateTimerDisplay();
+        }
+        function playTimerBeep(){
+            try { const C=window.AudioContext||window.webkitAudioContext; if(!C)return; const c=new C(),o=c.createOscillator(),g=c.createGain(); o.frequency.value=880; g.gain.value=.06; o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime+.18); } catch(e){}
+        }
+        function updateTimerDisplay(){
+            const m=Math.floor(timerSeconds/60), sec=timerSeconds%60;
+            const el=document.getElementById('timer-count'); if(el) el.innerText=`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+            const fill=document.getElementById('timer-progress-fill'); if(fill) fill.style.width=(timerTotalSeconds?Math.max(0,Math.min(100,(1-timerSeconds/timerTotalSeconds)*100)):0)+'%';
         }
 
         function switchView(viewName) {
