@@ -106,7 +106,6 @@
             font-size: 1.1rem;
         }
 
-        /* Selector de Días */
         .days-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -123,7 +122,6 @@
             cursor: pointer;
             font-size: 0.85rem;
             text-align: left;
-            position: relative;
         }
 
         .day-btn.active {
@@ -138,12 +136,11 @@
             margin-top: 2px;
         }
 
-        /* Ejercicios */
         .exercise-card {
             background: #252525;
             padding: 12px;
             border-radius: 6px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             border-left: 4px solid var(--primary-color);
         }
 
@@ -162,13 +159,26 @@
             color: var(--text-muted);
         }
 
-        .sets-list {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 8px;
+        /* Tabla de series dentro del ejercicio */
+        .set-row {
+            display: grid;
+            grid-template-columns: 50px 1fr 1fr auto;
+            gap: 6px;
+            align-items: center;
+            margin-bottom: 6px;
+            background: #1c1c1c;
+            padding: 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
         }
 
-        /* Temporizador */
+        .set-row input {
+            padding: 4px;
+            text-align: center;
+            margin: 0;
+            font-size: 0.85rem;
+        }
+
         .timer-box {
             background: #181818;
             border: 1px solid var(--border-color);
@@ -185,7 +195,6 @@
             margin: 5px 0;
         }
 
-        /* Botones generales */
         button.btn {
             background-color: var(--primary-color);
             color: white;
@@ -222,7 +231,6 @@
             flex: 1;
         }
 
-        /* Inputs y Formularios de Ajustes/Modales */
         input, select {
             width: 100%;
             padding: 8px;
@@ -239,13 +247,10 @@
         }
 
         .history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             background: var(--card-bg);
-            padding: 10px;
+            padding: 12px;
             border-radius: 6px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             border: 1px solid var(--border-color);
         }
     </style>
@@ -264,10 +269,8 @@
                 <button class="btn btn-secondary" onclick="openEditDay()" style="padding: 4px 8px; font-size: 0.75rem;">⚙️ Editar Día</button>
             </div>
 
-            <!-- Selector de los 4 días -->
             <div class="days-container" id="daysSelector"></div>
 
-            <!-- Temporizador -->
             <div class="timer-box">
                 <label>TEMPORIZADOR DE DESCANSO</label>
                 <div class="timer-display" id="timerDisplay">00:00</div>
@@ -279,10 +282,8 @@
                 </div>
             </div>
 
-            <!-- Lista de ejercicios del día seleccionado -->
             <div id="exerciseContainer"></div>
 
-            <!-- Botones Iniciar / Finalizar Entreno -->
             <div class="actions-row">
                 <button id="btnToggleWorkout" class="btn btn-success" onclick="toggleWorkoutSession()">Iniciar Entreno</button>
             </div>
@@ -307,10 +308,10 @@
                 <input type="date" id="rutinaFin" onchange="saveSettings()">
             </div>
 
-            <h2>Copias de Seguridad (Backups)</h2>
+            <h2>Copias de Seguridad</h2>
             <div class="card">
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Exporta o importa tus entrenamientos y configuración sin afectar al historial.</p>
-                <button class="btn btn-secondary" style="margin-bottom: 8px;" onclick="exportBackup()">Crear Copia de Seguridad</button>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Exporta tus entrenamientos actuales o restaura una copia anterior (el historial no se altera).</p>
+                <button class="btn btn-secondary" style="margin-bottom: 8px;" onclick="exportBackup()">Guardar / Exportar Copia</button>
                 <label class="btn btn-secondary" style="display:block; text-align:center; cursor:pointer;">
                     Restaurar Copia <input type="file" id="importFile" style="display:none" onchange="importBackup(event)">
                 </label>
@@ -318,7 +319,7 @@
         </section>
     </main>
 
-    <!-- MODAL / VISTA DE EDICIÓN DE DÍA -->
+    <!-- MODAL DE EDICIÓN -->
     <div id="editModal" class="card" style="display:none; position:fixed; top:10px; left:10px; right:10px; bottom:10px; z-index:2000; background:#181818; overflow-y:auto; max-width:460px; margin:0 auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h3 id="editModalTitle">Editar Día</h3>
@@ -336,11 +337,10 @@
     </nav>
 
     <script>
-        // Estructura de Datos por Defecto
         const defaultWorkouts = {
-            1: { title: "DÍA 1: EMPUJE", subtitle: "PECHO, HOMBRO, TRICEPS", exercises: [{ name: "Press de Banca", type: "Compuesto", sets: 4, reps: "10-8-8-6", rest: 90 }] },
+            1: { title: "DÍA 1: EMPUJE", subtitle: "PECHO, HOMBRO, TRICEPS", exercises: [{ name: "Press de Banca", type: "Compuesto", sets: 4, reps: "10", rest: 90 }] },
             2: { title: "DÍA 2: TRACCION", subtitle: "ESPALDA, HOMBRO, BICEPS", exercises: [{ name: "Dominadas", type: "Compuesto", sets: 3, reps: "8", rest: 90 }] },
-            3: { title: "DÍA 3: PIERNAS", subtitle: "PIERNAS", exercises: [{ name: "Sentadilla Libre", type: "Compuesto", sets: 4, reps: "10-8-8-6", rest: 120 }] },
+            3: { title: "DÍA 3: PIERNAS", subtitle: "PIERNAS", exercises: [{ name: "Sentadilla Libre", type: "Compuesto", sets: 4, reps: "10", rest: 120 }] },
             4: { title: "DÍA 4: BRAZOS", subtitle: "BICEPS, TRICEPS, HOMBRO", exercises: [{ name: "Curl Bíceps", type: "Aislado", sets: 3, reps: "12", rest: 60 }] }
         };
 
@@ -351,8 +351,8 @@
         let currentDay = 1;
         let activeWorkoutStart = null;
         let timerInterval = null;
+        let workoutLogs = {}; // Almacena temporalmente pesos/reps introducidos en el entreno activo
 
-        // Gestión de Pestañas
         function switchTab(tabId, event) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
@@ -361,7 +361,6 @@
             if(tabId === 'historial') renderHistory();
         }
 
-        // Renderizar Pestaña Entreno
         function renderEntreno() {
             const selector = document.getElementById('daysSelector');
             selector.innerHTML = '';
@@ -378,48 +377,69 @@
             const container = document.getElementById('exerciseContainer');
             container.innerHTML = `<h3>${workouts[currentDay].title} (${workouts[currentDay].subtitle})</h3>`;
             
-            workouts[currentDay].exercises.forEach((ex, idx) => {
+            workouts[currentDay].exercises.forEach((ex, exIdx) => {
+                if(!workoutLogs[exIdx]) workoutLogs[exIdx] = [];
+                
+                let setsHtml = '';
+                for(let s = 0; s < ex.sets; s++) {
+                    if(!workoutLogs[exIdx][s]) workoutLogs[exIdx][s] = { weight: '', reps: ex.reps };
+                    let log = workoutLogs[exIdx][s];
+                    
+                    setsHtml += `
+                        <div class="set-row">
+                            <span>S${s+1}</span>
+                            <input type="number" placeholder="Kg" value="${log.weight}" oninput="updateLog(${exIdx}, ${s}, 'weight', this.value)">
+                            <input type="text" placeholder="Reps" value="${log.reps}" oninput="updateLog(${exIdx}, ${s}, 'reps', this.value)">
+                            <button class="btn btn-secondary" style="padding:4px 6px; font-size:0.7rem;" onclick="startTimer(${ex.rest})">⏱</button>
+                        </div>
+                    `;
+                }
+
                 container.innerHTML += `
                     <div class="exercise-card">
                         <div class="exercise-header">
                             <strong>${ex.name}</strong>
-                            <span class="badge">${ex.type}</span>
+                            <span class="badge">${ex.type} | Descanso: ${ex.rest}s</span>
                         </div>
-                        <div class="sets-list">
-                            Series: <strong>${ex.sets}</strong> | Reps: <strong>${ex.reps}</strong> | Descanso: <strong>${ex.rest}s</strong>
-                        </div>
-                        <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="startTimer(${ex.rest})">⏱ Descansar (${ex.rest}s)</button>
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:5px;">Series y Registro:</div>
+                        ${setsHtml}
                     </div>
                 `;
             });
         }
 
+        function updateLog(exIdx, setIdx, field, value) {
+            if(!workoutLogs[exIdx]) workoutLogs[exIdx] = [];
+            if(!workoutLogs[exIdx][setIdx]) workoutLogs[exIdx][setIdx] = { weight: '', reps: '' };
+            workoutLogs[exIdx][setIdx][field] = value;
+        }
+
         function selectDay(day) {
             currentDay = day;
+            workoutLogs = {}; // Reinicia registros visuales al cambiar de día en caliente
             renderEntreno();
         }
 
-        // Temporizador
+        // Temporizador robusto ante bloqueo de pantalla con timestamp
         function startTimer(seconds) {
             stopTimer();
-            let timeLeft = seconds;
             const display = document.getElementById('timerDisplay');
+            const endTime = Date.now() + (seconds * 1000);
             
-            function updateDisplay() {
+            function update() {
+                const timeLeft = Math.round((endTime - Date.now()) / 1000);
+                if(timeLeft < 0) {
+                    stopTimer();
+                    display.textContent = "¡TIEMPO!";
+                    return;
+                }
                 let m = Math.floor(timeLeft / 60);
                 let s = timeLeft % 60;
                 display.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
             }
-            
-            updateDisplay();
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                updateDisplay();
-                if(timeLeft < 0) {
-                    stopTimer();
-                    display.textContent = "¡TIEMPO!";
-                }
-            }, 1000);
+
+            update();
+            timerInterval = setInterval(update, 500);
         }
 
         function stopTimer() {
@@ -427,11 +447,12 @@
             document.getElementById('timerDisplay').textContent = "00:00";
         }
 
-        // Iniciar / Finalizar Entreno
         function toggleWorkoutSession() {
             const btn = document.getElementById('btnToggleWorkout');
             if(!activeWorkoutStart) {
                 activeWorkoutStart = new Date();
+                workoutLogs = {};
+                renderEntreno();
                 btn.textContent = "Finalizar Entreno";
                 btn.className = "btn btn-danger";
                 alert("¡Entrenamiento iniciado!");
@@ -443,21 +464,37 @@
                 
                 const dayString = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth()+1).toString().padStart(2, '0')}/${now.getFullYear()}`;
                 
+                // Recopilar desglose completo de ejercicios
+                let sessionExercises = [];
+                workouts[currentDay].exercises.forEach((ex, exIdx) => {
+                    let exerciseRecord = { name: ex.name, sets: [] };
+                    if(workoutLogs[exIdx]) {
+                        workoutLogs[exIdx].forEach((log, sIdx) => {
+                            if(log) {
+                                exerciseRecord.sets.push({ setNum: sIdx + 1, weight: log.weight || '0', reps: log.reps || '0' });
+                            }
+                        });
+                    }
+                    sessionExercises.push(exerciseRecord);
+                });
+
                 historyData.unshift({
                     date: dayString,
                     name: workouts[currentDay].title,
-                    duration: `${mins}m ${secs}s`
+                    duration: `${mins}m ${secs}s`,
+                    exercises: sessionExercises
                 });
 
                 localStorage.setItem('gym_history', JSON.stringify(historyData));
                 activeWorkoutStart = null;
+                workoutLogs = {};
                 btn.textContent = "Iniciar Entreno";
                 btn.className = "btn btn-success";
+                renderEntreno();
                 alert("¡Entrenamiento guardado en el historial con éxito!");
             }
         }
 
-        // Historial
         function renderHistory() {
             const list = document.getElementById('historyList');
             if(historyData.length === 0) {
@@ -466,13 +503,22 @@
             }
             list.innerHTML = '';
             historyData.forEach((item, index) => {
+                let exercisesHtml = '';
+                if(item.exercises) {
+                    item.exercises.forEach(ex => {
+                        let setsText = ex.sets.map(s => `S${s.setNum}: ${s.weight}kg x ${s.reps}r`).join(' | ');
+                        exercisesHtml += `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:3px;">• <strong>${ex.name}</strong>: ${setsText}</div>`;
+                    });
+                }
+
                 list.innerHTML += `
                     <div class="history-item">
-                        <div>
-                            <strong>${item.name}</strong><br>
-                            <small style="color: var(--text-muted);">${item.date} - Duración: ${item.duration}</small>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong>${item.name}</strong>
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 0.7rem;" onclick="deleteHistory(${index})">Eliminar</button>
                         </div>
-                        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.75rem;" onclick="deleteHistory(${index})">Eliminar</button>
+                        <small style="color: var(--primary-color); display:block; margin: 3px 0;">${item.date} - Duración: ${item.duration}</small>
+                        ${exercisesHtml}
                     </div>
                 `;
             });
@@ -484,7 +530,6 @@
             renderHistory();
         }
 
-        // Ajustes y Configuración
         function loadSettings() {
             document.getElementById('rutinaInicio').value = settings.inicio || '';
             document.getElementById('rutinaFin').value = settings.fin || '';
@@ -496,7 +541,6 @@
             localStorage.setItem('gym_settings', JSON.stringify(settings));
         }
 
-        // Copias de Seguridad (Backups)
         function exportBackup() {
             const backupObj = { workouts, settings };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupObj));
@@ -525,7 +569,7 @@
                         loadSettings();
                     }
                     renderEntreno();
-                    alert("Copia de seguridad cargada correctamente (el historial se ha mantenido intacto).");
+                    alert("Copia de seguridad cargada correctamente. El historial se ha mantenido intacto.");
                 } catch(err) {
                     alert("El archivo no es válido.");
                 }
@@ -533,7 +577,6 @@
             reader.readAsText(file);
         }
 
-        // Edición de Días de Entreno
         function openEditDay() {
             document.getElementById('editModalTitle').textContent = `Editar ${workouts[currentDay].title}`;
             renderEditExercises();
@@ -563,7 +606,7 @@
                                 <input type="number" id="ex_rest_${idx}" value="${ex.rest}">
                             </div>
                         </div>
-                        <label>Repeticiones:</label>
+                        <label>Repeticiones (Base):</label>
                         <input type="text" id="ex_reps_${idx}" value="${ex.reps}">
                         <label>Tipo:</label>
                         <select id="ex_type_${idx}">
@@ -599,7 +642,6 @@
             alert("Rutina actualizada correctamente.");
         }
 
-        // Inicialización al cargar la página
         renderEntreno();
         loadSettings();
     </script>
