@@ -997,7 +997,10 @@
                 html += '<div class="history-item">' +
                             '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">' +
                                 '<strong>' + item.name + '</strong>' +
-                                '<span style="font-size:0.8rem; color:var(--text-light);">' + item.date + '</span>' +
+                                '<div style="display:flex; align-items:center; gap:0.5rem;">' +
+                                    '<span style="font-size:0.8rem; color:var(--text-light);">' + item.date + '</span>' +
+                                    '<button class="btn-sm warning" style="padding:0.25rem 0.5rem; font-size:0.75rem;" onclick="deleteHistoryItem(' + item.id + ')">🗑️ Eliminar</button>' +
+                                '</div>' +
                             '</div>' +
                             '<div style="margin-top:0.5rem; display:flex; gap:0.4rem; flex-wrap:wrap;">' +
                                 '<span class="history-meta-badge">⏱️ ' + formatDuration(item.durationMs) + '</span>' +
@@ -1020,6 +1023,16 @@
                 html += '</div>';
             }
             container.innerHTML = html;
+        }
+
+        function deleteHistoryItem(id) {
+            if (confirm("¿Estás seguro de que deseas borrar este entrenamiento del historial?")) {
+                appState.history = appState.history.filter(function(item) {
+                    return item.id !== id;
+                });
+                saveState();
+                renderHistoryView();
+            }
         }
 
         /* AJUSTES */
