@@ -258,13 +258,12 @@
         .view.active { display: block; }
         
         .history-item { 
-            border-left: 4px solid var(--primary); 
             padding: 1rem; 
             margin-bottom: 1rem;
             background: var(--card-bg);
             border-radius: 8px;
             border: 1px solid var(--border);
-            border-left-width: 4px;
+            border-left: 4px solid var(--primary); 
         }
         .history-meta-badge {
             display: inline-flex;
@@ -364,7 +363,7 @@
 
     <header>
         <h1 style="margin:0; font-size:1.4rem;">🏋️ GymApp Pro</h1>
-        <p id="cycle-info" style="margin:0.25rem 0 0 0; font-size:0.85rem; color:#93c5fd;">Cargando motor de sobrecarga...</p>
+        <p id="cycle-info" style="margin:0.25rem 0 0 0; font-size:0.85rem; color:#93c5fd;">Iniciando sistema...</p>
     </header>
 
     <div class="container">
@@ -469,7 +468,7 @@
     </nav>
 
     <script>
-        const STORAGE_KEY = 'gymApp_adaptive_v4_fixed';
+        const STORAGE_KEY = 'gymApp_adaptive_v5_safe';
 
         const exerciseEvolutionTree = {
             empuje_plano: [
@@ -650,8 +649,12 @@
             restTimerRemaining = seconds;
             restTimerPaused = false;
 
-            document.getElementById('timer-bar').style.display = 'block';
-            document.getElementById('timer-pause-btn').textContent = 'Pausar';
+            const timerBar = document.getElementById('timer-bar');
+            if (timerBar) timerBar.style.display = 'block';
+            
+            const pauseBtn = document.getElementById('timer-pause-btn');
+            if (pauseBtn) pauseBtn.textContent = 'Pausar';
+            
             updateTimerUI();
 
             restTimerInterval = setInterval(() => {
@@ -668,16 +671,18 @@
         function updateTimerUI() {
             const mins = Math.floor(Math.max(0, restTimerRemaining) / 60);
             const secs = Math.max(0, restTimerRemaining) % 60;
-            document.getElementById('timer-count').textContent = 
-                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            const countEl = document.getElementById('timer-count');
+            if (countEl) countEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
             
             const pct = restTimerTotal > 0 ? ((restTimerTotal - restTimerRemaining) / restTimerTotal) * 100 : 0;
-            document.getElementById('timer-progress-fill').style.width = `${Math.min(100, Math.max(0, pct))}%`;
+            const fillEl = document.getElementById('timer-progress-fill');
+            if (fillEl) fillEl.style.width = `${Math.min(100, Math.max(0, pct))}%`;
         }
 
         function toggleRestTimerPause() {
             restTimerPaused = !restTimerPaused;
-            document.getElementById('timer-pause-btn').textContent = restTimerPaused ? 'Reanudar' : 'Pausar';
+            const pauseBtn = document.getElementById('timer-pause-btn');
+            if (pauseBtn) pauseBtn.textContent = restTimerPaused ? 'Reanudar' : 'Pausar';
         }
 
         function adjustRestTimer(amount) {
@@ -689,7 +694,8 @@
         function stopRestTimer() {
             clearInterval(restTimerInterval);
             restTimerInterval = null;
-            document.getElementById('timer-bar').style.display = 'none';
+            const timerBar = document.getElementById('timer-bar');
+            if (timerBar) timerBar.style.display = 'none';
         }
 
         function switchView(viewName) {
@@ -709,7 +715,9 @@
         function renderHeaderInfo() {
             const { week, cycle } = getNaturalWeekAndCycle();
             const infoEl = document.getElementById('cycle-info');
-            if (infoEl) infoEl.textContent = `Ciclo ${cycle} | Semana ${week} de 6`;
+            if (infoEl) {
+                infoEl.textContent = `Ciclo ${cycle} | Semana ${week} de 6`;
+            }
         }
 
         function renderWorkoutView() {
@@ -1128,10 +1136,11 @@
             }
         }
 
-        window.onload = function() {
+        // Arranque seguro garantizado
+        document.addEventListener("DOMContentLoaded", function() {
             loadAppState();
             renderWorkoutView();
-        };
+        });
     </script>
 </body>
 </html>
