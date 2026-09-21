@@ -386,14 +386,10 @@
                 </div>
             </div>
 
-            <!-- SECCIÓN: CONTROL DE FECHAS (MODIFICADO) -->
+            <!-- SECCIÓN: CONTROL DE FECHAS (SÓLO RUTINA) -->
             <div class="card">
-                <h3>Fechas del Programa y Rutina</h3>
+                <h3>Fechas de la Rutina</h3>
                 <div style="display: flex; flex-direction: column; gap: 0.8rem;">
-                    <div>
-                        <label style="font-size:0.85rem; color:var(--text-light); display:block; margin-bottom:0.3rem;">Fecha de Inicio del Programa</label>
-                        <input type="date" id="cycle-start-date" style="padding:0.6rem; font-size:1rem; width:100%; box-sizing:border-box; background:#0f172a; color:white; border:1px solid var(--border); border-radius:8px;" onchange="updateStartDate(this.value)">
-                    </div>
                     <div>
                         <label style="font-size:0.85rem; color:var(--text-light); display:block; margin-bottom:0.3rem;">Fecha Inicio Rutina</label>
                         <input type="date" id="routine-start-date" style="padding:0.6rem; font-size:1rem; width:100%; box-sizing:border-box; background:#0f172a; color:white; border:1px solid var(--border); border-radius:8px;" onchange="updateRoutineStartDate(this.value)">
@@ -585,7 +581,6 @@
         var STORAGE_KEY = 'gymApp_adaptive_v4';
 
         var defaultAppState = {
-            startDate: new Date().toISOString().split('T')[0],
             routineStartDate: new Date().toISOString().split('T')[0],
             routineEndDate: '',
             history: [],
@@ -602,7 +597,6 @@
         function normalizeState(raw) {
             var source = (raw && typeof raw === 'object') ? raw : {};
             return {
-                startDate: (source.startDate && typeof source.startDate === 'string') ? source.startDate : defaultAppState.startDate,
                 routineStartDate: (source.routineStartDate && typeof source.routineStartDate === 'string') ? source.routineStartDate : (source.startDate || defaultAppState.routineStartDate),
                 routineEndDate: (source.routineEndDate && typeof source.routineEndDate === 'string') ? source.routineEndDate : '',
                 history: Array.isArray(source.history) ? source.history : [],
@@ -640,10 +634,8 @@
 
         function getNaturalWeekAndCycle() {
             try {
-                if (!appState.startDate || typeof appState.startDate !== 'string') {
-                    appState.startDate = new Date().toISOString().split('T')[0];
-                }
-                var startParts = appState.startDate.split('-');
+                var startDateStr = appState.routineStartDate || new Date().toISOString().split('T')[0];
+                var startParts = startDateStr.split('-');
                 var start = new Date(Number(startParts[0]), Number(startParts[1]) - 1, Number(startParts[2]));
                 var now = new Date();
                 var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -1105,9 +1097,6 @@
 
         /* AJUSTES */
         function renderSettingsView() {
-            var inputEl = document.getElementById('cycle-start-date');
-            if (inputEl) inputEl.value = appState.startDate || '';
-
             var rStartEl = document.getElementById('routine-start-date');
             if (rStartEl) rStartEl.value = appState.routineStartDate || '';
 
@@ -1115,16 +1104,10 @@
             if (rEndEl) rEndEl.value = appState.routineEndDate || '';
         }
 
-        function updateStartDate(newDate) {
-            if (!newDate) return;
-            appState.startDate = newDate;
-            saveState();
-            renderHeaderInfo();
-        }
-
         function updateRoutineStartDate(newDate) {
             appState.routineStartDate = newDate;
             saveState();
+            renderHeaderInfo();
         }
 
         function updateRoutineEndDate(newDate) {
