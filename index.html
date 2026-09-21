@@ -148,7 +148,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
 
         .badge {
@@ -397,7 +397,7 @@
                         <div class="set-row">
                             <span>S${s+1}</span>
                             <input type="number" placeholder="Kg" value="${log.weight}" oninput="updateLog(${exIdx}, ${s}, 'weight', this.value)">
-                            <input type="text" placeholder="Reps" value="${log.reps}" oninput="updateLog(${exIdx}, ${s}, 'reps', this.value)">
+                            <input type="text" placeholder="Reps (Obj: ${ex.reps})" value="${log.reps}" oninput="updateLog(${exIdx}, ${s}, 'reps', this.value)" title="Objetivo: ${ex.reps} reps">
                             <button class="btn btn-secondary" style="padding:4px 6px; font-size:0.7rem;" onclick="startTimer(${ex.rest})">⏱</button>
                         </div>
                     `;
@@ -409,7 +409,8 @@
                             <strong>${ex.name}</strong>
                             <span class="badge">${ex.type} | Descanso: ${ex.rest}s</span>
                         </div>
-                        <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:5px;">Series y Registro:</div>
+                        <div style="font-size:0.75rem; color:var(--primary-color); margin-bottom:6px;">🎯 Objetivo Reps: <strong>${ex.reps}</strong></div>
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">Series, Peso y Reps Realizadas:</div>
                         ${setsHtml}
                     </div>
                 `;
@@ -473,7 +474,7 @@
                 
                 let sessionExercises = [];
                 workouts[currentDay].exercises.forEach((ex, exIdx) => {
-                    let exerciseRecord = { name: ex.name, sets: [] };
+                    let exerciseRecord = { name: ex.name, targetReps: ex.reps, sets: [] };
                     if(workoutLogs[exIdx]) {
                         workoutLogs[exIdx].forEach((log, sIdx) => {
                             if(log) {
@@ -513,7 +514,7 @@
                 if(item.exercises) {
                     item.exercises.forEach(ex => {
                         let setsText = ex.sets.map(s => `S${s.setNum}: ${s.weight}kg x ${s.reps}r`).join(' | ');
-                        exercisesHtml += `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:3px;">• <strong>${ex.name}</strong>: ${setsText}</div>`;
+                        exercisesHtml += `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:3px;">• <strong>${ex.name}</strong> (Obj: ${ex.targetReps}): ${setsText}</div>`;
                     });
                 }
 
@@ -619,7 +620,6 @@
             reader.readAsText(file);
         }
 
-        // Corrección aplicada aquí para evitar desajustes al editar/añadir ejercicios
         function openEditDay() {
             document.getElementById('editModalTitle').textContent = `Editar ${workouts[currentDay].title}`;
             renderEditExercises();
@@ -649,7 +649,7 @@
                                 <input type="number" class="edit-rest" value="${ex.rest}">
                             </div>
                         </div>
-                        <label>Repeticiones (Base):</label>
+                        <label>Repeticiones (Objetivo):</label>
                         <input type="text" class="edit-reps" value="${ex.reps}">
                         <label>Tipo:</label>
                         <select class="edit-type">
@@ -663,7 +663,6 @@
         }
 
         function addExerciseToCurrentDay() {
-            // Guardar cambios actuales antes de añadir para no perder nada escrito
             syncEditFormToMemory();
             workouts[currentDay].exercises.push({ name: "Nuevo Ejercicio", type: "Compuesto", sets: 3, reps: "10", rest: 60 });
             renderEditExercises();
