@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GymApp Pro 4.0 — Entrenador Personal Adaptativo</title>
+    <title>GymApp Pro 4.1 — Entrenador Personal Adaptativo</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -139,6 +139,9 @@
             margin-bottom: 1.2rem;
             border: 1px solid var(--border);
             border-left: 5px solid var(--primary);
+        }
+        .exercise-box.isolated {
+            border-left: 5px solid var(--accent);
         }
         .exercise-box.superset {
             border-left: 5px solid var(--purple);
@@ -356,7 +359,7 @@
             color: var(--text-light);
             margin-bottom: 0.2rem;
         }
-        .edit-form-row input {
+        .edit-form-row input, .edit-form-row select {
             width: 100%;
             padding: 0.45rem;
             background: #0f172a;
@@ -449,9 +452,15 @@
     <div id="edit-session-modal" class="modal-overlay" style="display:none;">
         <div class="modal-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.5rem;">
-                <h3 id="modal-session-title" style="margin:0; color:#60a5fa;">Editar Sesión</h3>
+                <h3 style="margin:0; color:#60a5fa;">Editar Sesión</h3>
                 <button class="btn-sm secondary" onclick="closeEditModal()">✖ Cerrar</button>
             </div>
+            
+            <div class="card" style="margin-bottom: 1rem; padding: 0.85rem;">
+                <label style="display:block; font-size:0.8rem; color:var(--text-light); margin-bottom:0.3rem;">Nombre del Entrenamiento</label>
+                <input type="text" id="modal-session-name-input" style="width:100%; padding:0.5rem; background:#0f172a; border:1px solid var(--border); color:white; border-radius:6px; box-sizing:border-box; font-size:1rem;" oninput="updateEditingSessionName(this.value)">
+            </div>
+
             <div id="modal-session-body"></div>
             <div style="margin-top:1.2rem; display:flex; gap:0.5rem; flex-wrap:wrap;">
                 <button onclick="addExerciseToDraft()" class="secondary" style="flex:1;">➕ Añadir Ejercicio</button>
@@ -473,68 +482,68 @@
     <script>
         const exerciseEvolutionTree = {
             empuje_plano: [
-                { id: 'press_banca', name: 'Press de Banca Plano con Barra', muscle: 'Pectoral Mayor', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 150, baseWeight: 50, tempo: '3-0-1-0', steps: ['Retrae escápulas.', 'Baja la barra al esternón.', 'Empuja explosivo.'] },
-                { id: 'press_banca_manc', name: 'Press Plano con Mancuernas Pesadas', muscle: 'Pectoral Mayor', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 150, baseWeight: 22, tempo: '3-1-1-0', steps: ['Mayor rango de movimiento.', 'Desciende sintiendo el estiramiento.', 'Junta mancuernas arriba.'] },
-                { id: 'press_inclinado_barra', name: 'Press Inclinado con Barra Olimpia', muscle: 'Pectoral Superior', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 150, baseWeight: 52.5, tempo: '3-0-1-0', steps: ['Banco a 30 grados.', 'Baja a la parte alta del pecho.'] }
+                { id: 'press_banca', name: 'Press de Banca Plano con Barra', muscle: 'Pectoral Mayor', type: 'compuesto', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 150, baseWeight: 50, tempo: '3-0-1-0', steps: ['Retrae escápulas.', 'Baja la barra al esternón.', 'Empuja explosivo.'] },
+                { id: 'press_banca_manc', name: 'Press Plano con Mancuernas Pesadas', muscle: 'Pectoral Mayor', type: 'compuesto', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 150, baseWeight: 22, tempo: '3-1-1-0', steps: ['Mayor rango de movimiento.', 'Desciende sintiendo el estiramiento.', 'Junta mancuernas arriba.'] },
+                { id: 'press_inclinado_barra', name: 'Press Inclinado con Barra Olimpia', muscle: 'Pectoral Superior', type: 'compuesto', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 150, baseWeight: 52.5, tempo: '3-0-1-0', steps: ['Banco a 30 grados.', 'Baja a la parte alta del pecho.'] }
             ],
             empuje_inclinado: [
-                { id: 'press_inc_manc', name: 'Press Inclinado con Mancuernas', muscle: 'Pecho Superior', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 120, baseWeight: 18, tempo: '2-1-1-0', steps: ['Apertura a 45°.', 'Mantén codos alineados.'] },
-                { id: 'fondos_pecho', name: 'Fondos en Paralelas con Lastre', muscle: 'Pecho Inferior / Tríceps', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 120, baseWeight: 5, tempo: '3-0-1-0', steps: ['Inclina el torso ligeramente adelante.', 'Baja hasta 90° de codo.'] }
+                { id: 'press_inc_manc', name: 'Press Inclinado con Mancuernas', muscle: 'Pecho Superior', type: 'compuesto', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 120, baseWeight: 18, tempo: '2-1-1-0', steps: ['Apertura a 45°.', 'Mantén codos alineados.'] },
+                { id: 'fondos_pecho', name: 'Fondos en Paralelas con Lastre', muscle: 'Pecho Inferior / Tríceps', type: 'compuesto', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 120, baseWeight: 5, tempo: '3-0-1-0', steps: ['Inclina el torso ligeramente adelante.', 'Baja hasta 90° de codo.'] }
             ],
             pecho_aislado: [
-                { id: 'cruces_polea', name: 'Cruces de Polea Alta / Media', muscle: 'Pectoral (Aislamiento)', series: 3, minReps: 10, maxReps: 12, targetReps: '10-12 reps', defaultRest: 75, baseWeight: 15, tempo: '2-0-1-1', steps: ['Flexión ligera de codo.', 'Aprieta 1s en el centro.'] },
-                { id: 'peck_deck', name: 'Contractora / Peck Deck', muscle: 'Pectoral Medio', series: 3, minReps: 12, maxReps: 15, targetReps: '12-15 reps', defaultRest: 75, baseWeight: 40, tempo: '2-1-1-1', steps: ['Codos a la altura del pecho.', 'Junta sin perder tensión.'] }
+                { id: 'cruces_polea', name: 'Cruces de Polea Alta / Media', muscle: 'Pectoral (Aislamiento)', type: 'aislado', series: 3, minReps: 10, maxReps: 12, targetReps: '10-12 reps', defaultRest: 75, baseWeight: 15, tempo: '2-0-1-1', steps: ['Flexión ligera de codo.', 'Aprieta 1s en el centro.'] },
+                { id: 'peck_deck', name: 'Contractora / Peck Deck', muscle: 'Pectoral Medio', type: 'aislado', series: 3, minReps: 12, maxReps: 15, targetReps: '12-15 reps', defaultRest: 75, baseWeight: 40, tempo: '2-1-1-1', steps: ['Codos a la altura del pecho.', 'Junta sin perder tensión.'] }
             ],
             triceps_principal: [
-                { id: 'triceps_polea', name: 'Extensión Tríceps en Polea Cuerda', muscle: 'Tríceps (Lateral)', series: 4, minReps: 10, maxReps: 12, targetReps: '10-12 reps', defaultRest: 60, isSuperset: true, baseWeight: 20, tempo: '2-0-1-0', steps: ['Codos inmóviles.', 'Abre la cuerda al final.'] },
-                { id: 'press_frances', name: 'Press Francés con Barra Z', muscle: 'Tríceps (Global)', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 90, isSuperset: false, baseWeight: 22.5, tempo: '3-0-1-0', steps: ['Baja la barra hacia la frente.', 'Codos cerrados.'] }
+                { id: 'triceps_polea', name: 'Extensión Tríceps en Polea Cuerda', muscle: 'Tríceps (Lateral)', type: 'aislado', series: 4, minReps: 10, maxReps: 12, targetReps: '10-12 reps', defaultRest: 60, isSuperset: true, baseWeight: 20, tempo: '2-0-1-0', steps: ['Codos inmóviles.', 'Abre la cuerda al final.'] },
+                { id: 'press_frances', name: 'Press Francés con Barra Z', muscle: 'Tríceps (Global)', type: 'compuesto', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 90, isSuperset: false, baseWeight: 22.5, tempo: '3-0-1-0', steps: ['Baja la barra hacia la frente.', 'Codos cerrados.'] }
             ],
             triceps_accesorio: [
-                { id: 'triceps_nuca', name: 'Extensión Tras Nuca en Polea', muscle: 'Tríceps (Cabeza Larga)', series: 3, minReps: 12, maxReps: 15, targetReps: '12-15 reps', defaultRest: 60, isSuperset: true, baseWeight: 12, tempo: '3-0-1-0', steps: ['Estiramiento completo tras la cabeza.'] }
+                { id: 'triceps_nuca', name: 'Extensión Tras Nuca en Polea', muscle: 'Tríceps (Cabeza Larga)', type: 'aislado', series: 3, minReps: 12, maxReps: 15, targetReps: '12-15 reps', defaultRest: 60, isSuperset: true, baseWeight: 12, tempo: '3-0-1-0', steps: ['Estiramiento completo tras la cabeza.'] }
             ],
             tiron_vertical: [
-                { id: 'jalon_pecho', name: 'Jalón al Pecho en Polea', muscle: 'Dorsal Ancho', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 120, baseWeight: 45, tempo: '3-0-1-0', steps: ['Tira sacando pecho.', 'Lleva la barra a la clavícula.'] },
-                { id: 'dominadas', name: 'Dominadas Pronas Asistidas/Lastradas', muscle: 'Dorsal Ancho', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 150, baseWeight: 0, tempo: '3-0-1-0', steps: ['Rango completo colgado.', 'Barbilla sobre barra.'] }
+                { id: 'jalon_pecho', name: 'Jalón al Pecho en Polea', muscle: 'Dorsal Ancho', type: 'compuesto', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 120, baseWeight: 45, tempo: '3-0-1-0', steps: ['Tira sacando pecho.', 'Lleva la barra a la clavícula.'] },
+                { id: 'dominadas', name: 'Dominadas Pronas Asistidas/Lastradas', muscle: 'Dorsal Ancho', type: 'compuesto', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 150, baseWeight: 0, tempo: '3-0-1-0', steps: ['Rango completo colgado.', 'Barbilla sobre barra.'] }
             ],
             tiron_horizontal: [
-                { id: 'remo_gironda', name: 'Remo Sentado en Polea (Gironda)', muscle: 'Espalda Media / Trapecio', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 105, baseWeight: 40, tempo: '2-1-1-0', steps: ['Tracciona directo al ombligo.', 'Junta escápulas.'] },
-                { id: 'remo_barra', name: 'Remo con Barra 90° / Pendlay', muscle: 'Grosor de Espalda', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 130, baseWeight: 45, tempo: '2-0-1-0', steps: ['Espalda paralela al suelo.', 'Tira al abdomen.'] }
+                { id: 'remo_gironda', name: 'Remo Sentado en Polea (Gironda)', muscle: 'Espalda Media / Trapecio', type: 'compuesto', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 105, baseWeight: 40, tempo: '2-1-1-0', steps: ['Tracciona directo al ombligo.', 'Junta escápulas.'] },
+                { id: 'remo_barra', name: 'Remo con Barra 90° / Pendlay', muscle: 'Grosor de Espalda', type: 'compuesto', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 130, baseWeight: 45, tempo: '2-0-1-0', steps: ['Espalda paralela al suelo.', 'Tira al abdomen.'] }
             ],
             cuadriceps_principal: [
-                { id: 'sentadilla', name: 'Sentadilla Trasera con Barra', muscle: 'Cuádriceps / Glúteo', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 180, baseWeight: 60, tempo: '3-1-1-0', steps: ['Pies ancho de hombros.', 'Rompe los 90° en profundidad.'] },
-                { id: 'prensa_piernas', name: 'Prensa de Piernas 45° Inclinada', muscle: 'Cuádriceps Global', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 150, baseWeight: 110, tempo: '3-0-1-0', steps: ['Baja profundo sin levantar cadera.'] }
+                { id: 'sentadilla', name: 'Sentadilla Trasera con Barra', muscle: 'Cuádriceps / Glúteo', type: 'compuesto', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 180, baseWeight: 60, tempo: '3-1-1-0', steps: ['Pies ancho de hombros.', 'Rompe los 90° en profundidad.'] },
+                { id: 'prensa_piernas', name: 'Prensa de Piernas 45° Inclinada', muscle: 'Cuádriceps Global', type: 'compuesto', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 150, baseWeight: 110, tempo: '3-0-1-0', steps: ['Baja profundo sin levantar cadera.'] }
             ],
             isquios_principal: [
-                { id: 'peso_muerto_rum', name: 'Peso Muerto Rumano', muscle: 'Isquios / Glúteo', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 120, baseWeight: 50, tempo: '3-1-1-0', steps: ['Cadera hacia atrás.', 'Barra pegada a piernas.'] },
-                { id: 'curl_femoral', name: 'Curl Femoral Tumbado', muscle: 'Isquios Aislamiento', series: 4, minReps: 10, maxReps: 12, targetReps: '10-12 reps', defaultRest: 90, baseWeight: 35, tempo: '2-1-1-0', steps: ['Contracción fuerte en la flexión.'] }
+                { id: 'peso_muerto_rum', name: 'Peso Muerto Rumano', muscle: 'Isquios / Glúteo', type: 'compuesto', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 120, baseWeight: 50, tempo: '3-1-1-0', steps: ['Cadera hacia atrás.', 'Barra pegada a piernas.'] },
+                { id: 'curl_femoral', name: 'Curl Femoral Tumbado', muscle: 'Isquios Aislamiento', type: 'aislado', series: 4, minReps: 10, maxReps: 12, targetReps: '10-12 reps', defaultRest: 90, baseWeight: 35, tempo: '2-1-1-0', steps: ['Contracción fuerte en la flexión.'] }
             ],
             tiron_accesorio: [
-                { id:'pullover_polea', name:'Pullover en Polea Alta', muscle:'Dorsal Ancho', series:3, minReps:10, maxReps:12, targetReps:'10-12 reps', defaultRest:75, baseWeight:20, tempo:'2-1-1-0', steps:['Mantén brazos ligeramente flexionados.','Lleva la barra hacia los muslos sin convertirlo en un jalón.','Controla el estiramiento.'] },
-                { id:'remo_pecho_apoyado', name:'Remo con Pecho Apoyado', muscle:'Espalda Media', series:3, minReps:8, maxReps:12, targetReps:'8-12 reps', defaultRest:90, baseWeight:30, tempo:'2-1-1-0', steps:['Pecho estable contra el apoyo.','Lleva los codos hacia atrás.','Evita encoger los hombros.'] }
+                { id:'pullover_polea', name:'Pullover en Polea Alta', muscle:'Dorsal Ancho', type:'aislado', series:3, minReps:10, maxReps:12, targetReps:'10-12 reps', defaultRest:75, baseWeight:20, tempo:'2-1-1-0', steps:['Mantén brazos ligeramente flexionados.','Lleva la barra hacia los muslos sin convertirlo en un jalón.','Controla el estiramiento.'] },
+                { id:'remo_pecho_apoyado', name:'Remo con Pecho Apoyado', muscle:'Espalda Media', type:'compuesto', series:3, minReps:8, maxReps:12, targetReps:'8-12 reps', defaultRest:90, baseWeight:30, tempo:'2-1-1-0', steps:['Pecho estable contra el apoyo.','Lleva los codos hacia atrás.','Evita encoger los hombros.'] }
             ],
             gluteo_principal: [
-                { id:'hip_thrust', name:'Hip Thrust con Barra', muscle:'Glúteo', series:3, minReps:8, maxReps:12, targetReps:'8-12 reps', defaultRest:120, baseWeight:60, tempo:'2-1-1-0', steps:['Barra estable sobre la cadera.','Eleva hasta extensión de cadera sin hiperextender la espalda.','Pausa arriba.'] },
-                { id:'zancada_bulgara', name:'Sentadilla Búlgara', muscle:'Glúteo / Cuádriceps', series:3, minReps:8, maxReps:12, targetReps:'8-12 reps', defaultRest:105, baseWeight:12, tempo:'3-0-1-0', steps:['Pie delantero estable.','Desciende verticalmente con control.','Empuja con toda la planta del pie.'] }
+                { id:'hip_thrust', name:'Hip Thrust con Barra', muscle:'Glúteo', type:'compuesto', series:3, minReps:8, maxReps:12, targetReps:'8-12 reps', defaultRest:120, baseWeight:60, tempo:'2-1-1-0', steps:['Barra estable sobre la cadera.','Eleva hasta extensión de cadera sin hiperextender la espalda.','Pausa arriba.'] },
+                { id:'zancada_bulgara', name:'Sentadilla Búlgara', muscle:'Glúteo / Cuádriceps', type:'compuesto', series:3, minReps:8, maxReps:12, targetReps:'8-12 reps', defaultRest:105, baseWeight:12, tempo:'3-0-1-0', steps:['Pie delantero estable.','Desciende verticalmente con control.','Empuja con toda la planta del pie.'] }
             ],
             gemelo_principal: [
-                { id:'gemelo_de_pie', name:'Elevación de Gemelos de Pie', muscle:'Gemelos', series:3, minReps:10, maxReps:15, targetReps:'10-15 reps', defaultRest:60, baseWeight:40, tempo:'2-1-1-1', steps:['Baja hasta sentir estiramiento.','Sube a máxima flexión plantar.','Pausa arriba.'] },
-                { id:'gemelo_sentado', name:'Elevación de Gemelos Sentado', muscle:'Sóleo / Gemelos', series:3, minReps:12, maxReps:15, targetReps:'12-15 reps', defaultRest:60, baseWeight:30, tempo:'2-1-1-1', steps:['Mantén la rodilla estable.','Busca recorrido completo.','No rebotes abajo.'] }
+                { id:'gemelo_de_pie', name:'Elevación de Gemelos de Pie', muscle:'Gemelos', type:'aislado', series:3, minReps:10, maxReps:15, targetReps:'10-15 reps', defaultRest:60, baseWeight:40, tempo:'2-1-1-1', steps:['Baja hasta sentir estiramiento.','Sube a máxima flexión plantar.','Pausa arriba.'] },
+                { id:'gemelo_sentado', name:'Elevación de Gemelos Sentado', muscle:'Sóleo / Gemelos', type:'aislado', series:3, minReps:12, maxReps:15, targetReps:'12-15 reps', defaultRest:60, baseWeight:30, tempo:'2-1-1-1', steps:['Mantén la rodilla estable.','Busca recorrido completo.','No rebotes abajo.'] }
             ],
             biceps_principal: [
-                { id: 'curl_barra', name: 'Curl de Bíceps con Barra Z', muscle: 'Bíceps', series: 3, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 75, baseWeight: 20, tempo: '2-0-1-0', steps: ['Codos pegados al cuerpo.', 'Sube sin balancear el torso.', 'Controla la bajada.'] },
-                { id: 'curl_mancuernas', name: 'Curl Alterno con Mancuernas', muscle: 'Bíceps', series: 3, minReps: 10, maxReps: 12, targetReps: '10-12 reps', defaultRest: 75, baseWeight: 10, tempo: '2-0-1-0', steps: ['Supina durante la subida.', 'Evita mover el hombro.'] }
+                { id: 'curl_barra', name: 'Curl de Bíceps con Barra Z', muscle: 'Bíceps', type: 'aislado', series: 3, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 75, baseWeight: 20, tempo: '2-0-1-0', steps: ['Codos pegados al cuerpo.', 'Sube sin balancear el torso.', 'Controla la bajada.'] },
+                { id: 'curl_mancuernas', name: 'Curl Alterno con Mancuernas', muscle: 'Bíceps', type: 'aislado', series: 3, minReps: 10, maxReps: 12, targetReps: '10-12 reps', defaultRest: 75, baseWeight: 10, tempo: '2-0-1-0', steps: ['Supina durante la subida.', 'Evita mover el hombro.'] }
             ],
             hombro_principal: [
-                { id: 'press_militar', name: 'Press Militar con Mancuernas', muscle: 'Deltoides', series: 3, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 120, baseWeight: 16, tempo: '2-0-1-0', steps: ['Abdomen firme.', 'No hiperextiendas la zona lumbar.', 'Controla la bajada.'] },
-                { id: 'press_hombro_maquina', name: 'Press de Hombro en Máquina', muscle: 'Deltoides', series: 3, minReps: 8, maxReps: 12, targetReps: '8-12 reps', defaultRest: 105, baseWeight: 30, tempo: '2-1-1-0', steps: ['Ajusta el asiento.', 'Empuja sin bloquear agresivamente los codos.'] }
+                { id: 'press_militar', name: 'Press Militar con Mancuernas', muscle: 'Deltoides', type: 'compuesto', series: 3, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 120, baseWeight: 16, tempo: '2-0-1-0', steps: ['Abdomen firme.', 'No hiperextiendas la zona lumbar.', 'Controla la bajada.'] },
+                { id: 'press_hombro_maquina', name: 'Press de Hombro en Máquina', muscle: 'Deltoides', type: 'compuesto', series: 3, minReps: 8, maxReps: 12, targetReps: '8-12 reps', defaultRest: 105, baseWeight: 30, tempo: '2-1-1-0', steps: ['Ajusta el asiento.', 'Empuja sin bloquear agresivamente los codos.'] }
             ],
             hombro_aislado: [
-                { id: 'elevaciones_laterales', name: 'Elevaciones Laterales', muscle: 'Deltoides Lateral', series: 3, minReps: 12, maxReps: 15, targetReps: '12-15 reps', defaultRest: 60, baseWeight: 7, tempo: '2-0-1-1', steps: ['Codos ligeramente flexionados.', 'Sube hasta aproximadamente la línea del hombro.', 'No balancees el cuerpo.'] },
-                { id: 'face_pull', name: 'Face Pull en Polea', muscle: 'Deltoides Posterior / Trapecio', series: 3, minReps: 12, maxReps: 15, targetReps: '12-15 reps', defaultRest: 60, baseWeight: 15, tempo: '2-1-1-1', steps: ['Tira hacia la cara.', 'Rota externamente sin elevar los hombros.'] }
+                { id: 'elevaciones_laterales', name: 'Elevaciones Laterales', muscle: 'Deltoides Lateral', type: 'aislado', series: 3, minReps: 12, maxReps: 15, targetReps: '12-15 reps', defaultRest: 60, baseWeight: 7, tempo: '2-0-1-1', steps: ['Codos ligeramente flexionados.', 'Sube hasta aproximadamente la línea del hombro.', 'No balancees el cuerpo.'] },
+                { id: 'face_pull', name: 'Face Pull en Polea', muscle: 'Deltoides Posterior / Trapecio', type: 'aislado', series: 3, minReps: 12, maxReps: 15, targetReps: '12-15 reps', defaultRest: 60, baseWeight: 15, tempo: '2-1-1-1', steps: ['Tira hacia la cara.', 'Rota externamente sin elevar los hombros.'] }
             ],
             core_principal: [
-                { id: 'crunch_polea', name: 'Crunch en Polea', muscle: 'Core', series: 3, minReps: 10, maxReps: 15, targetReps: '10-15 reps', defaultRest: 60, baseWeight: 20, tempo: '2-1-1-0', steps: ['Flexiona el tronco.', 'Evita tirar con los brazos.'] },
-                { id: 'elevaciones_piernas', name: 'Elevaciones de Piernas', muscle: 'Core', series: 3, minReps: 10, maxReps: 15, targetReps: '10-15 reps', defaultRest: 60, baseWeight: 0, tempo: '2-0-1-0', steps: ['Mantén el control.', 'Evita balancearte.'] }
+                { id: 'crunch_polea', name: 'Crunch en Polea', muscle: 'Core', type: 'aislado', series: 3, minReps: 10, maxReps: 15, targetReps: '10-15 reps', defaultRest: 60, baseWeight: 20, tempo: '2-1-1-0', steps: ['Flexiona el tronco.', 'Evita tirar con los brazos.'] },
+                { id: 'elevaciones_piernas', name: 'Elevaciones de Piernas', muscle: 'Core', type: 'aislado', series: 3, minReps: 10, maxReps: 15, targetReps: '10-15 reps', defaultRest: 60, baseWeight: 0, tempo: '2-0-1-0', steps: ['Mantén el control.', 'Evita balancearte.'] }
             ]
         };
 
@@ -546,7 +555,7 @@
         };
 
         const rotationOrder = ['A', 'B', 'C', 'D'];
-        const STORAGE_KEY = 'gymApp_adaptive_v3';
+        const STORAGE_KEY = 'gymApp_adaptive_v4';
 
         const defaultAppState = {
             startDate: new Date().toISOString().split('T')[0],
@@ -559,7 +568,6 @@
             workoutStartTime: null,
             activeDay: 'A',
             readinessScore: 3,
-            sessionRPE: '',
             draftInputs: {}
         };
 
@@ -796,13 +804,15 @@
 
             currentWorkout.exercises.forEach((ex, exIdx) => {
                 const exKey = `${appState.activeDay}_${ex.id}`;
+                const isIsolated = ex.type === 'aislado';
                 html += `
-                    <div class="exercise-box ${ex.isSuperset ? 'superset' : ''}">
+                    <div class="exercise-box ${isIsolated ? 'isolated' : ''} ${ex.isSuperset ? 'superset' : ''}">
                         <div class="exercise-header">
                             <div>
                                 <div class="exercise-title">${ex.name}</div>
                                 <div class="exercise-meta">
                                     <span class="meta-pill">🎯 ${ex.muscle}</span>
+                                    <span class="meta-pill" style="text-transform: capitalize;">📌 ${ex.type || 'compuesto'}</span>
                                     <span class="meta-pill">📊 ${ex.targetReps || 'Reps objetivo'}</span>
                                     ${ex.tempo ? `<span class="meta-pill">⏱️ Tempo: ${ex.tempo}</span>` : ''}
                                 </div>
@@ -843,18 +853,6 @@
                     </div>
                 `;
             });
-
-            if (appState.workoutStarted) {
-                html += `
-                    <div class="card">
-                        <h3>Evaluación de la Sesión</h3>
-                        <label style="font-size:0.85rem; color:var(--text-light); display:block; margin-bottom:0.4rem;">RPE de la sesión (1-10):</label>
-                        <input type="number" min="1" max="10" placeholder="Ej: 8" value="${appState.sessionRPE || ''}" 
-                            style="width:100%; padding:0.6rem; background:#0f172a; border:1px solid var(--border); color:white; border-radius:6px; box-sizing:border-box;"
-                            onchange="appState.sessionRPE = this.value; saveState();">
-                    </div>
-                `;
-            }
 
             container.innerHTML = html;
         }
@@ -913,7 +911,6 @@
                 name: currentWorkout.name,
                 durationMs,
                 readiness: appState.readinessScore,
-                rpe: appState.sessionRPE || 'N/A',
                 exercises: exercisesRecorded
             };
 
@@ -921,7 +918,6 @@
             appState.workoutStarted = false;
             appState.workoutStartTime = null;
             appState.draftInputs = {};
-            appState.sessionRPE = '';
 
             const currentIndex = rotationOrder.indexOf(appState.activeDay);
             appState.activeDay = rotationOrder[(currentIndex + 1) % rotationOrder.length];
@@ -948,7 +944,6 @@
                     <div style="margin-top:0.5rem; display:flex; gap:0.4rem; flex-wrap:wrap;">
                         <span class="history-meta-badge">⏱️ ${formatDuration(item.durationMs)}</span>
                         <span class="history-meta-badge">⚡ Energía: ${item.readiness}/5</span>
-                        <span class="history-meta-badge">📊 RPE: ${item.rpe}</span>
                     </div>
                     ${item.exercises ? item.exercises.map(ex => `
                         <div class="history-exercise-block">
@@ -1041,13 +1036,16 @@
 
         let currentEditingDay = null;
         let editingDraftExercises = [];
+        let editingSessionName = '';
 
         function openEditModal(dayTab) {
             currentEditingDay = dayTab;
             const { cycle } = getNaturalWeekAndCycle();
             const workout = getEvolvedWorkoutForCycle(dayTab, cycle);
 
-            document.getElementById('modal-session-title').textContent = `Editar Sesión ${dayTab}`;
+            editingSessionName = workout.name;
+            document.getElementById('modal-session-name-input').value = editingSessionName;
+            
             editingDraftExercises = JSON.parse(JSON.stringify(workout.exercises));
             
             renderEditModalBody();
@@ -1056,6 +1054,10 @@
 
         function closeEditModal() {
             document.getElementById('edit-session-modal').style.display = 'none';
+        }
+
+        function updateEditingSessionName(val) {
+            editingSessionName = val;
         }
 
         function renderEditModalBody() {
@@ -1078,6 +1080,13 @@
                     </div>
                     <div class="edit-form-row">
                         <div>
+                            <label>Tipo</label>
+                            <select onchange="editingDraftExercises[${idx}].type = this.value">
+                                <option value="compuesto" ${ex.type === 'compuesto' ? 'selected' : ''}>Compuesto</option>
+                                <option value="aislado" ${ex.type === 'aislado' ? 'selected' : ''}>Aislado</option>
+                            </select>
+                        </div>
+                        <div>
                             <label>Series</label>
                             <input type="number" value="${ex.series || 3}" onchange="editingDraftExercises[${idx}].series = Number(this.value)">
                         </div>
@@ -1099,6 +1108,7 @@
                 id: 'custom_' + Date.now(),
                 name: 'Nuevo Ejercicio',
                 muscle: 'General',
+                type: 'compuesto',
                 series: 3,
                 minReps: 8,
                 maxReps: 12,
@@ -1117,7 +1127,7 @@
         function saveSessionCustomization() {
             if (!appState.customRoutines) appState.customRoutines = {};
             appState.customRoutines[currentEditingDay] = {
-                name: `Sesión ${currentEditingDay} (Personalizada)`,
+                name: editingSessionName || `Sesión ${currentEditingDay}`,
                 focus: 'Personalizado por el usuario',
                 exercises: editingDraftExercises
             };
