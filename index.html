@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
+<!DOCTYPE html><html lang="es"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GymApp Pro 4.0 — Entrenador Personal Adaptativo</title>
@@ -149,8 +147,6 @@
             border: 1px solid var(--border);
             color: #e2e8f0;
         }
-        .meta-pill.compuesto { border-color: #3b82f6; color: #93c5fd; }
-        .meta-pill.aislado { border-color: #a855f7; color: #e9d5ff; }
 
         .tech-guide {
             display: none;
@@ -252,6 +248,39 @@
             border: 1px solid var(--border);
             border-left-width: 4px;
         }
+        .history-meta-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: var(--card-inner);
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #e2e8f0;
+            border: 1px solid var(--border);
+        }
+        .history-exercise-block {
+            margin-top: 0.75rem;
+            padding-top: 0.6rem;
+            border-top: 1px dashed var(--border);
+        }
+        .history-exercise-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #60a5fa;
+            margin-bottom: 0.4rem;
+        }
+        .history-set-pill {
+            display: inline-block;
+            background: #0f172a;
+            padding: 0.25rem 0.5rem;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            border: 1px solid var(--border);
+            margin-right: 0.4rem;
+            margin-bottom: 0.4rem;
+            color: #cbd5e1;
+        }
 
         .timer-progress { height:6px; background:#1e293b; border-radius:999px; overflow:hidden; margin-top:.45rem; }
         .timer-progress > div { height:100%; width:0%; background:#38bdf8; transition:width .25s linear; }
@@ -288,30 +317,6 @@
             margin-bottom: 0.85rem;
             border: 1px solid var(--border);
         }
-        .edit-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.75rem;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-        .edit-title-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-        .select-tipo {
-            background: #0f172a;
-            color: #38bdf8;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 0.3rem 0.5rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
         .edit-form-row {
             display: flex;
             gap: 0.5rem;
@@ -328,7 +333,7 @@
             color: var(--text-light);
             margin-bottom: 0.2rem;
         }
-        .edit-form-row input {
+        .edit-form-row input, .edit-form-row select {
             width: 100%;
             padding: 0.45rem;
             background: #0f172a;
@@ -338,9 +343,7 @@
             box-sizing: border-box;
             font-size: 0.9rem;
         }
-    </style>
-</head>
-<body>
+    </style></head><body>
 
     <header>
         <h1 style="margin:0; font-size:1.4rem;">🏋️ GymApp Pro</h1>
@@ -360,14 +363,15 @@
             <div id="history-content"></div>
         </div>
 
-        <!-- VISTA 3: AJUSTES -->
+        <!-- VISTA 3: AJUSTES / CONFIGURACIÓN -->
         <div id="view-settings" class="view">
             <h2>Configuración e Inteligencia del Entrenador</h2>
 
+            <!-- SECCIÓN: PROGRAMACIÓN DE ENTRENAMIENTOS -->
             <div class="card" style="border-color: var(--primary);">
-                <h3>📅 Programación de Entrenamientos (6 Semanas)</h3>
+                <h3 style="margin-top:0; color:#60a5fa;">📅 Programación de Entrenamientos (6 Semanas)</h3>
                 <p style="font-size:0.85rem; color:var(--text-light); margin-bottom: 0.8rem;">
-                    Descarga la plantilla para diseñarla en tu ordenador o carga un archivo JSON de entrenamientos para actualizarlos.
+                    Descarga la plantilla para diseñarla en tu ordenador o carga un archivo JSON de entrenamientos para actualizarlos. <strong>El historial guardado NO se borrará.</strong>
                 </p>
                 <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
                     <label class="btn-upload" style="flex:1; margin:0; cursor:pointer; background: #2563eb;">
@@ -378,6 +382,7 @@
                 </div>
             </div>
 
+            <!-- SECCIÓN: CONTROL DE FECHAS (SÓLO RUTINA) -->
             <div class="card">
                 <h3>Fechas de la Rutina</h3>
                 <div style="display: flex; flex-direction: column; gap: 0.8rem;">
@@ -391,11 +396,49 @@
                     </div>
                 </div>
             </div>
+            
+            <div class="card">
+                <h3>Avanzar de Ciclo Manualmente</h3>
+                <p style="font-size:0.85rem; color:var(--text-light);">
+                    Activa manualmente un nuevo ciclo y conserva el historial y las cargas calculadas anteriores.
+                </p>
+                <button onclick="forceCycleEvolution()" class="secondary" style="background:#6b21a8;">🚀 Forzar / Recalcular Siguiente Ciclo</button>
+            </div>
+
+            <div class="card">
+                <h3>Copia de Seguridad Completa (Backup)</h3>
+                <div style="display:flex; flex-direction:column; gap:0.6rem;">
+                    <button class="secondary" onclick="exportBackup()">📥 Descargar Backup Completo (.json)</button>
+                    <label class="btn-upload">
+                        📤 Restaurar Backup Completo (.json)
+                        <input type="file" id="import-file" accept=".json" onchange="importBackup(event)" style="display:none;">
+                    </label>
+                </div>
+            </div>
 
             <div class="card">
                 <h3>Reset de Datos</h3>
                 <button class="warning" onclick="resetApp()">⚠️ Borrar Todo y Reiniciar</button>
             </div>
+        </div>
+    </div>
+
+    <!-- CRONÓMETRO FLOTANTE DE DESCANSO -->
+    <div id="timer-bar">
+        <div class="timer-container" style="display:block;">
+            <div style="display:flex;justify-content:space-between;gap:.7rem;align-items:center;">
+                <div>
+                    <small id="timer-label" style="color:#94a3b8; display:block; font-size:0.8rem;">Descanso</small>
+                    <span id="timer-count" class="timer-display">00:00</span>
+                </div>
+                <div class="timer-controls">
+                    <button class="btn-sm secondary" onclick="adjustRestTimer(-15)">−15</button>
+                    <button class="btn-sm secondary" onclick="adjustRestTimer(15)">+15</button>
+                    <button class="btn-sm secondary" onclick="toggleRestTimerPause()" id="timer-pause-btn">Pausar</button>
+                    <button class="btn-sm warning" onclick="stopRestTimer()">Saltar</button>
+                </div>
+            </div>
+            <div class="timer-progress"><div id="timer-progress-fill"></div></div>
         </div>
     </div>
 
@@ -411,6 +454,9 @@
                 <button onclick="addExerciseToDraft()" class="secondary" style="flex:1;">➕ Añadir Ejercicio</button>
                 <button onclick="saveSessionCustomization()" class="success" style="flex:1;">💾 Guardar Cambios</button>
             </div>
+            <div style="margin-top:0.6rem;">
+                <button onclick="resetSessionToDefault()" class="warning" style="padding:0.4rem; font-size:0.8rem; background:transparent; color:#ef4444; text-decoration:underline;">Restablecer esta sesión a valores predeterminados</button>
+            </div>
         </div>
     </div>
 
@@ -422,201 +468,775 @@
     </nav>
 
     <script>
-        var STORAGE_KEY = 'gymApp_adaptive_v4';
-        var editingDay = null;
-        var draftExercises = [];
+        function safeGetStorage(key) {
+            try { return localStorage.getItem(key); } catch(e) { return null; }
+        }
+        function safeSetStorage(key, val) {
+            try { localStorage.setItem(key, val); } catch(e) {}
+        }
+        function safeRemoveStorage(key) {
+            try { localStorage.removeItem(key); } catch(e) {}
+        }
+
+        function hardResetApp() {
+            safeRemoveStorage(STORAGE_KEY);
+            window.location.reload(true);
+        }
 
         var exerciseEvolutionTree = {
             empuje_plano: [
-                { id: 'press_banca', name: 'Press de Banca Plano', type: 'compuesto', muscle: 'Pectoral', series: 4, targetReps: '6-8 reps', defaultRest: 150, baseWeight: 50 },
+                { id: 'press_banca', name: 'Press de Banca Plano con Barra', muscle: 'Pectoral Mayor', type: 'Compuesto', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 150, baseWeight: 50, tempo: '3-0-1-0', steps: ['Retrae escápulas.', 'Baja la barra al esternón.', 'Empuja explosivo.'] },
+                { id: 'press_banca_manc', name: 'Press Plano con Mancuernas', muscle: 'Pectoral Mayor', type: 'Compuesto', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 150, baseWeight: 22, tempo: '3-1-1-0', steps: ['Mayor rango de movimiento.', 'Desciende sintiendo el estiramiento.', 'Junta mancuernas arriba.'] }
             ],
             empuje_inclinado: [
-                { id: 'press_inc_manc', name: 'Press Inclinado Mancuernas', type: 'compuesto', muscle: 'Pectoral Superior', series: 4, targetReps: '8-10 reps', defaultRest: 120, baseWeight: 18 }
+                { id: 'press_inc_manc', name: 'Press Inclinado con Mancuernas', muscle: 'Pectoral Superior', type: 'Compuesto', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 120, baseWeight: 18, tempo: '2-1-1-0', steps: ['Apertura a 45°.', 'Mantén codos alineados.'] },
+                { id: 'press_inclinado_barra', name: 'Press Inclinado con Barra', muscle: 'Pectoral Superior', type: 'Compuesto', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 150, baseWeight: 52.5, tempo: '3-0-1-0', steps: ['Banco a 30 grados.', 'Baja a la parte alta del pecho.'] }
+            ],
+            pecho_aislado: [
+                { id: 'cruces_polea', name: 'Cruces de Polea Alta / Media', muscle: 'Pectoral (Aislamiento)', type: 'Aislado', series: 3, minReps: 10, maxReps: 12, targetReps: '10-12 reps', defaultRest: 75, baseWeight: 15, tempo: '2-0-1-1', steps: ['Flexión ligera de codo.', 'Aprieta 1s en el centro.'] },
+                { id: 'peck_deck', name: 'Contractora / Peck Deck', muscle: 'Pectoral Medio', type: 'Aislado', series: 3, minReps: 12, maxReps: 15, targetReps: '12-15 reps', defaultRest: 75, baseWeight: 40, tempo: '2-1-1-1', steps: ['Codos a la altura del pecho.', 'Junta sin perder tensión.'] }
+            ],
+            triceps_principal: [
+                { id: 'triceps_polea', name: 'Extensión Tríceps en Polea Cuerda', muscle: 'Tríceps (Lateral)', type: 'Aislado', series: 4, minReps: 10, maxReps: 12, targetReps: '10-12 reps', defaultRest: 60, baseWeight: 20, tempo: '2-0-1-0', steps: ['Codos inmóviles.', 'Abre la cuerda al final.'] },
+                { id: 'press_frances', name: 'Press Francés con Barra Z', muscle: 'Tríceps (Global)', type: 'Aislado', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 90, baseWeight: 22.5, tempo: '3-0-1-0', steps: ['Baja la barra hacia la frente.', 'Codos cerrados.'] }
+            ],
+            triceps_accesorio: [
+                { id: 'triceps_nuca', name: 'Extensión Tras Nuca en Polea', muscle: 'Tríceps (Cabeza Larga)', type: 'Aislado', series: 3, minReps: 12, maxReps: 15, targetReps: '12-15 reps', defaultRest: 60, baseWeight: 12, tempo: '3-0-1-0', steps: ['Estiramiento completo tras la cabeza.'] },
+                { id: 'fondos_triceps', name: 'Fondos para Tríceps', muscle: 'Tríceps', type: 'Compuesto', series: 3, minReps: 8, maxReps: 12, targetReps: '8-12 reps', defaultRest: 90, baseWeight: 0, tempo: '2-0-1-0', steps: ['Cuerpo vertical.', 'Codos pegados al cuerpo.'] }
+            ],
+            tiron_vertical: [
+                { id: 'jalon_pecho', name: 'Jalón al Pecho en Polea', muscle: 'Dorsal Ancho', type: 'Compuesto', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 120, baseWeight: 45, tempo: '3-0-1-0', steps: ['Tira sacando pecho.', 'Lleva la barra a la clavícula.'] },
+                { id: 'dominadas', name: 'Dominadas Pronas', muscle: 'Dorsal Ancho', type: 'Compuesto', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 150, baseWeight: 0, tempo: '3-0-1-0', steps: ['Rango completo colgado.', 'Barbilla sobre barra.'] }
+            ],
+            tiron_horizontal: [
+                { id: 'remo_gironda', name: 'Remo Sentado en Polea (Gironda)', muscle: 'Espalda Media / Trapecio', type: 'Compuesto', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 105, baseWeight: 40, tempo: '2-1-1-0', steps: ['Tracciona directo al ombligo.', 'Junta escápulas.'] },
+                { id: 'remo_barra', name: 'Remo con Barra 90°', muscle: 'Grosor de Espalda', type: 'Compuesto', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 130, baseWeight: 45, tempo: '2-0-1-0', steps: ['Espalda paralela al suelo.', 'Tira al abdomen.'] }
+            ],
+            tiron_accesorio: [
+                { id:'pullover_polea', name:'Pullover en Polea Alta', muscle:'Dorsal Ancho', type:'Aislado', series:3, minReps:10, maxReps:12, targetReps:'10-12 reps', defaultRest:75, baseWeight:20, tempo:'2-1-1-0', steps:['Mantén brazos ligeramente flexionados.','Lleva la barra hacia los muslos.'] },
+                { id:'remo_pecho_apoyado', name:'Remo con Pecho Apoyado', muscle:'Espalda Media', type:'Compuesto', series:3, minReps:8, maxReps:12, targetReps:'8-12 reps', defaultRest:90, baseWeight:30, tempo:'2-1-1-0', steps:['Pecho estable contra el apoyo.','Lleva los codos hacia atrás.'] }
+            ],
+            cuadriceps_principal: [
+                { id: 'sentadilla', name: 'Sentadilla Trasera con Barra', muscle: 'Cuádriceps / Glúteo', type: 'Compuesto', series: 4, minReps: 6, maxReps: 8, targetReps: '6-8 reps', defaultRest: 180, baseWeight: 60, tempo: '3-1-1-0', steps: ['Pies ancho de hombros.', 'Rompe los 90° en profundidad.'] },
+                { id: 'prensa_piernas', name: 'Prensa de Piernas 45°', muscle: 'Cuádriceps Global', type: 'Compuesto', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 150, baseWeight: 110, tempo: '3-0-1-0', steps: ['Baja profundo sin levantar cadera.'] }
+            ],
+            isquios_principal: [
+                { id: 'peso_muerto_rum', name: 'Peso Muerto Rumano', muscle: 'Isquios / Glúteo', type: 'Compuesto', series: 4, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 120, baseWeight: 50, tempo: '3-1-1-0', steps: ['Cadera hacia atrás.', 'Barra pegada a piernas.'] },
+                { id: 'curl_femoral', name: 'Curl Femoral Tumbado', muscle: 'Isquios Aislamiento', type: 'Aislado', series: 4, minReps: 10, maxReps: 12, targetReps: '10-12 reps', defaultRest: 90, baseWeight: 35, tempo: '2-1-1-0', steps: ['Contracción fuerte en la flexión.'] }
+            ],
+            gluteo_principal: [
+                { id:'hip_thrust', name:'Hip Thrust con Barra', muscle:'Glúteo', type:'Compuesto', series:3, minReps:8, maxReps:12, targetReps:'8-12 reps', defaultRest:120, baseWeight:60, tempo:'2-1-1-0', steps:['Barra estable sobre la cadera.','Eleva hasta extensión de cadera.'] },
+                { id:'zancada_bulgara', name:'Sentadilla Búlgara', muscle:'Glúteo / Cuádriceps', type:'Compuesto', series:3, minReps:8, maxReps:12, targetReps:'8-12 reps', defaultRest:105, baseWeight:12, tempo:'3-0-1-0', steps:['Pie delantero estable.','Desciende verticalmente.'] }
+            ],
+            gemelo_principal: [
+                { id:'gemelo_de_pie', name:'Elevación de Gemelos de Pie', muscle:'Gemelos', type:'Aislado', series:3, minReps:10, maxReps:15, targetReps:'10-15 reps', defaultRest:60, baseWeight:40, tempo:'2-1-1-1', steps:['Baja hasta sentir estiramiento.','Sube a máxima flexión.'] },
+                { id:'gemelo_sentado', name:'Elevación de Gemelos Sentado', muscle:'Sóleo / Gemelos', type:'Aislado', series:3, minReps:12, maxReps:15, targetReps:'12-15 reps', defaultRest:60, baseWeight:30, tempo:'2-1-1-1', steps:['Mantén la rodilla estable.','Busca recorrido completo.'] }
+            ],
+            biceps_principal: [
+                { id: 'curl_barra', name: 'Curl de Bíceps con Barra Z', muscle: 'Bíceps', type: 'Aislado', series: 3, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 75, baseWeight: 20, tempo: '2-0-1-0', steps: ['Codos pegados al cuerpo.', 'Sube sin balancear el torso.'] },
+                { id: 'curl_mancuernas', name: 'Curl Alterno con Mancuernas', muscle: 'Bíceps', type: 'Aislado', series: 3, minReps: 10, maxReps: 12, targetReps: '10-12 reps', defaultRest: 75, baseWeight: 10, tempo: '2-0-1-0', steps: ['Supina durante la subida.', 'Evita mover el hombro.'] }
+            ],
+            hombro_principal: [
+                { id: 'press_militar', name: 'Press Militar con Mancuernas', muscle: 'Deltoides Anterior', type: 'Compuesto', series: 3, minReps: 8, maxReps: 10, targetReps: '8-10 reps', defaultRest: 120, baseWeight: 16, tempo: '2-0-1-0', steps: ['Abdomen firme.', 'Controla la bajada.'] },
+                { id: 'press_hombro_maquina', name: 'Press de Hombro en Máquina', muscle: 'Deltoides Anterior', type: 'Compuesto', series: 3, minReps: 8, maxReps: 12, targetReps: '8-12 reps', defaultRest: 105, baseWeight: 30, tempo: '2-1-1-0', steps: ['Ajusta el asiento.', 'Empuja sin bloquear codos.'] }
+            ],
+            hombro_aislado: [
+                { id: 'elevaciones_laterales', name: 'Elevaciones Laterales', muscle: 'Deltoides Lateral', type: 'Aislado', series: 3, minReps: 12, maxReps: 15, targetReps: '12-15 reps', defaultRest: 60, baseWeight: 7, tempo: '2-0-1-1', steps: ['Codos ligeramente flexionados.', 'Sube hasta la línea del hombro.'] },
+                { id: 'face_pull', name: 'Face Pull en Polea', muscle: 'Deltoides Posterior', type: 'Aislado', series: 3, minReps: 12, maxReps: 15, targetReps: '12-15 reps', defaultRest: 60, baseWeight: 15, tempo: '2-1-1-1', steps: ['Tira hacia la cara.', 'Rota externamente los hombros.'] }
+            ],
+            core_principal: [
+                { id: 'crunch_polea', name: 'Crunch en Polea', muscle: 'Core', type: 'Aislado', series: 3, minReps: 10, maxReps: 15, targetReps: '10-15 reps', defaultRest: 60, baseWeight: 20, tempo: '2-1-1-0', steps: ['Flexiona el tronco.', 'Evita tirar con los brazos.'] },
+                { id: 'elevaciones_piernas', name: 'Elevaciones de Piernas', muscle: 'Core', type: 'Aislado', series: 3, minReps: 10, maxReps: 15, targetReps: '10-15 reps', defaultRest: 60, baseWeight: 0, tempo: '2-0-1-0', steps: ['Mantén el control.', 'Evita balancearte.'] }
             ]
         };
 
         var rutinaBaseStructure = {
-            'A': { name: 'Sesión A: Empuje', exercises: [
-                { name: 'Press de Banca Plano', type: 'compuesto', muscle: 'Pectoral', series: 4, targetReps: '6-8 reps', defaultRest: 150, baseWeight: 50 },
-                { name: 'Cruces de Polea Alta', type: 'aislado', muscle: 'Pectoral', series: 3, targetReps: '10-12 reps', defaultRest: 75, baseWeight: 15 }
-            ]},
-            'B': { name: 'Sesión B: Tracción', exercises: [
-                { name: 'Jalón al Pecho', type: 'compuesto', muscle: 'Dorsal', series: 4, targetReps: '6-8 reps', defaultRest: 120, baseWeight: 45 },
-                { name: 'Curl de Bíceps', type: 'aislado', muscle: 'Bíceps', series: 3, targetReps: '10-12 reps', defaultRest: 75, baseWeight: 15 }
-            ]},
-            'C': { name: 'Sesión C: Pierna', exercises: [
-                { name: 'Sentadilla Trasera', type: 'compuesto', muscle: 'Cuádriceps', series: 4, targetReps: '6-8 reps', defaultRest: 180, baseWeight: 60 },
-                { name: 'Extensión de Cuádriceps', type: 'aislado', muscle: 'Cuádriceps', series: 3, targetReps: '12-15 reps', defaultRest: 60, baseWeight: 30 }
-            ]},
-            'D': { name: 'Sesión D: Brazos', exercises: [
-                { name: 'Press Francés', type: 'compuesto', muscle: 'Tríceps', series: 4, targetReps: '8-10 reps', defaultRest: 90, baseWeight: 25 },
-                { name: 'Elevaciones Laterales', type: 'aislado', muscle: 'Deltoides', series: 3, targetReps: '12-15 reps', defaultRest: 60, baseWeight: 8 }
-            ]}
+            'A': { 
+                name: 'Sesión A: Empuje (Pecho, Hombro, Tríceps)', 
+                focus: 'Pecho, deltoides y tríceps', 
+                slots: ['empuje_plano', 'empuje_inclinado', 'hombro_principal', 'triceps_principal', 'pecho_aislado'] 
+            },
+            'B': { 
+                name: 'Sesión B: Tracción (Espalda, Hombro, Bíceps)', 
+                focus: 'Espalda, deltoides posterior y bíceps', 
+                slots: ['tiron_vertical', 'tiron_horizontal', 'tiron_accesorio', 'hombro_aislado', 'biceps_principal'] 
+            },
+            'C': { 
+                name: 'Sesión C: Piernas', 
+                focus: 'Cuádriceps, isquios, glúteos, gemelos y core', 
+                slots: ['cuadriceps_principal', 'isquios_principal', 'gluteo_principal', 'gemelo_principal', 'core_principal'] 
+            },
+            'D': { 
+                name: 'Sesión D: Brazos (Bíceps, Tríceps, Hombro)', 
+                focus: 'Hipertrofia de bíceps, tríceps y hombros', 
+                slots: ['biceps_principal', 'triceps_principal', 'hombro_principal', 'triceps_accesorio', 'hombro_aislado'] 
+            }
         };
 
-        var appState = {
+        var rotationOrder = ['A', 'B', 'C', 'D'];
+        var STORAGE_KEY = 'gymApp_adaptive_v4';
+
+        var defaultAppState = {
+            routineStartDate: new Date().toISOString().split('T')[0],
+            routineEndDate: '',
+            history: [],
+            cycleNumber: 1,
+            cycleCalculatedWeights: {},
             customRoutines: {},
-            activeDay: 'A'
+            workoutStarted: false,
+            workoutStartTime: null,
+            activeDay: 'A',
+            sessionRPE: '',
+            draftInputs: {}
         };
 
-        function openEditModal(dayKey) {
-            editingDay = dayKey;
-            var currentRoutine = appState.customRoutines[dayKey] || rutinaBaseStructure[dayKey];
-            draftExercises = JSON.parse(JSON.stringify(currentRoutine.exercises || []));
-            
-            document.getElementById('modal-session-title').innerText = 'Editar ' + currentRoutine.name;
-            renderModalBody();
-            document.getElementById('edit-session-modal').style.display = 'flex';
+        function normalizeState(raw) {
+            var source = (raw && typeof raw === 'object') ? raw : {};
+            return {
+                routineStartDate: (source.routineStartDate && typeof source.routineStartDate === 'string') ? source.routineStartDate : (source.startDate || defaultAppState.routineStartDate),
+                routineEndDate: (source.routineEndDate && typeof source.routineEndDate === 'string') ? source.routineEndDate : '',
+                history: Array.isArray(source.history) ? source.history : [],
+                cycleNumber: Number(source.cycleNumber) || 1,
+                cycleCalculatedWeights: (source.cycleCalculatedWeights && typeof source.cycleCalculatedWeights === 'object') ? source.cycleCalculatedWeights : {},
+                customRoutines: (source.customRoutines && typeof source.customRoutines === 'object') ? source.customRoutines : {},
+                draftInputs: (source.draftInputs && typeof source.draftInputs === 'object') ? source.draftInputs : {},
+                activeDay: (source.activeDay && rotationOrder.indexOf(source.activeDay) !== -1) ? source.activeDay : 'A',
+                workoutStarted: Boolean(source.workoutStarted),
+                workoutStartTime: source.workoutStartTime || null,
+                sessionRPE: source.sessionRPE || ''
+            };
         }
 
-        function renderModalBody() {
-            var container = document.getElementById('modal-session-body');
-            container.innerHTML = '';
-
-            draftExercises.forEach(function(ex, idx) {
-                var card = document.createElement('div');
-                card.className = 'edit-ex-card';
-                card.innerHTML = `
-                    <div class="edit-header-row">
-                        <div class="edit-title-group">
-                            <strong style="color:#60a5fa; font-size:0.95rem;">Ejercicio ${idx + 1}:</strong>
-                            <select class="select-tipo" onchange="updateExerciseField(${idx}, 'type', this.value)">
-                                <option value="compuesto" ${ex.type === 'compuesto' ? 'selected' : ''}>Compuesto</option>
-                                <option value="aislado" ${ex.type === 'aislado' ? 'selected' : ''}>Aislado</option>
-                            </select>
-                        </div>
-                        <button class="btn-sm warning" onclick="removeExerciseFromDraft(${idx})">🗑️ Eliminar</button>
-                    </div>
-                    
-                    <div class="edit-form-row">
-                        <div style="flex:2;">
-                            <label>Nombre del Ejercicio</label>
-                            <input type="text" value="${ex.name || ''}" onchange="updateExerciseField(${idx}, 'name', this.value)">
-                        </div>
-                        <div>
-                            <label>Músculo</label>
-                            <input type="text" value="${ex.muscle || ''}" onchange="updateExerciseField(${idx}, 'muscle', this.value)">
-                        </div>
-                    </div>
-
-                    <div class="edit-form-row">
-                        <div>
-                            <label>Series</label>
-                            <input type="number" value="${ex.series || 3}" onchange="updateExerciseField(${idx}, 'series', parseInt(this.value))">
-                        </div>
-                        <div>
-                            <label>Rango Reps</label>
-                            <input type="text" value="${ex.targetReps || '8-10 reps'}" onchange="updateExerciseField(${idx}, 'targetReps', this.value)">
-                        </div>
-                        <div>
-                            <label>Descanso (s)</label>
-                            <input type="number" value="${ex.defaultRest || 90}" onchange="updateExerciseField(${idx}, 'defaultRest', parseInt(this.value))">
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
+        var appState;
+        try {
+            var loadedStr = safeGetStorage(STORAGE_KEY);
+            appState = normalizeState(loadedStr ? JSON.parse(loadedStr) : null);
+        } catch (e) {
+            appState = normalizeState(null);
         }
 
-        function updateExerciseField(index, field, value) {
-            if (draftExercises[index]) {
-                draftExercises[index][field] = value;
+        function saveState() {
+            safeSetStorage(STORAGE_KEY, JSON.stringify(appState));
+        }
 
-                // Lógica de descanso automático al cambiar el tipo de ejercicio
-                if (field === 'type') {
-                    if (value === 'compuesto') {
-                        draftExercises[index].defaultRest = 150;
-                    } else if (value === 'aislado') {
-                        draftExercises[index].defaultRest = 75;
+        function formatDuration(ms) {
+            if (!ms || ms <= 0) return '0 min';
+            var totalSecs = Math.floor(ms / 1000);
+            var mins = Math.floor(totalSecs / 60);
+            var secs = totalSecs % 60;
+            if (mins < 1) return secs + 's';
+            return mins + ' min ' + secs + 's';
+        }
+
+        function getNaturalWeekAndCycle() {
+            try {
+                if (!appState.routineStartDate) return { week: 1, cycle: appState.cycleNumber || 1 };
+                var start = new Date(appState.routineStartDate);
+                var now = new Date();
+                var diffDays = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+                if (diffDays < 0) diffDays = 0;
+                var currentWeek = Math.floor(diffDays / 7) + 1;
+                var calculatedCycle = Math.floor((currentWeek - 1) / 6) + 1;
+                var cycle = Math.max(appState.cycleNumber || 1, calculatedCycle);
+                var weekInCycle = ((currentWeek - 1) % 6) + 1;
+                return { week: weekInCycle, cycle: cycle };
+            } catch(e) {
+                return { week: 1, cycle: 1 };
+            }
+        }
+
+        var restTimerInterval = null;
+        var restTimerSeconds = 0;
+        var restTimerTotal = 0;
+        var restTimerPaused = false;
+
+        function startRestTimer(seconds) {
+            if (restTimerInterval) clearInterval(restTimerInterval);
+            restTimerSeconds = seconds;
+            restTimerTotal = seconds;
+            restTimerPaused = false;
+            document.getElementById('timer-bar').style.display = 'block';
+            document.getElementById('timer-pause-btn').innerText = 'Pausar';
+            updateTimerDisplay();
+
+            restTimerInterval = setInterval(function() {
+                if (!restTimerPaused) {
+                    restTimerSeconds--;
+                    updateTimerDisplay();
+                    if (restTimerSeconds <= 0) {
+                        stopRestTimer();
+                        try {
+                            var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                            var osc = audioCtx.createOscillator();
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                            osc.connect(audioCtx.destination);
+                            osc.start();
+                            osc.stop(audioCtx.currentTime + 0.5);
+                        } catch(e) {}
                     }
-                    renderModalBody();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            var m = Math.floor(restTimerSeconds / 60);
+            var s = restTimerSeconds % 60;
+            document.getElementById('timer-count').innerText = 
+                (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+            var pct = restTimerTotal > 0 ? Math.max(0, Math.min(100, (restTimerSeconds / restTimerTotal) * 100)) : 0;
+            var fill = document.getElementById('timer-progress-fill');
+            if (fill) fill.style.width = pct + '%';
+        }
+
+        function adjustRestTimer(amount) {
+            restTimerSeconds += amount;
+            if (restTimerSeconds < 0) restTimerSeconds = 0;
+            if (restTimerSeconds > restTimerTotal) restTimerTotal = restTimerSeconds;
+            updateTimerDisplay();
+        }
+
+        function toggleRestTimerPause() {
+            restTimerPaused = !restTimerPaused;
+            document.getElementById('timer-pause-btn').innerText = restTimerPaused ? 'Reanudar' : 'Pausar';
+        }
+
+        function stopRestTimer() {
+            if (restTimerInterval) clearInterval(restTimerInterval);
+            restTimerInterval = null;
+            document.getElementById('timer-bar').style.display = 'none';
+        }
+
+        function switchView(viewName) {
+            document.querySelectorAll('.view').forEach(function(el) { el.classList.remove('active'); });
+            document.querySelectorAll('nav button').forEach(function(el) { el.classList.remove('active'); });
+            
+            document.getElementById('view-' + viewName).classList.add('active');
+            document.getElementById('nav-' + viewName).classList.add('active');
+
+            if (viewName === 'workout') renderWorkoutView();
+            if (viewName === 'history') renderHistoryView();
+            if (viewName === 'settings') renderSettingsView();
+        }
+
+        function getActiveSessionExercises(dayKey) {
+            if (appState.customRoutines && appState.customRoutines[dayKey]) {
+                return appState.customRoutines[dayKey];
+            }
+            var slots = rutinaBaseStructure[dayKey].slots;
+            var cycleIdx = (appState.cycleNumber - 1) % 2;
+            var result = [];
+            for (var i = 0; i < slots.length; i++) {
+                var slotKey = slots[i];
+                var options = exerciseEvolutionTree[slotKey];
+                if (options) {
+                    var ex = options[cycleIdx] || options[0];
+                    result.push(JSON.parse(JSON.stringify(ex)));
                 }
             }
-        }
-
-        function addExerciseToDraft() {
-            draftExercises.push({
-                name: 'Nuevo Ejercicio',
-                type: 'compuesto',
-                muscle: 'General',
-                series: 3,
-                targetReps: '10-12 reps',
-                defaultRest: 150
-            });
-            renderModalBody();
-        }
-
-        function removeExerciseFromDraft(index) {
-            draftExercises.splice(index, 1);
-            renderModalBody();
-        }
-
-        function saveSessionCustomization() {
-            if (!editingDay) return;
-            if (!appState.customRoutines[editingDay]) {
-                appState.customRoutines[editingDay] = { name: rutinaBaseStructure[editingDay].name };
-            }
-            appState.customRoutines[editingDay].exercises = draftExercises;
-            closeEditModal();
-            renderWorkoutView();
-        }
-
-        function closeEditModal() {
-            document.getElementById('edit-session-modal').style.display = 'none';
+            return result;
         }
 
         function renderWorkoutView() {
             var container = document.getElementById('workout-content');
-            var dayKey = appState.activeDay;
-            var routine = appState.customRoutines[dayKey] || rutinaBaseStructure[dayKey];
+            var weekCycle = getNaturalWeekAndCycle();
+            
+            document.getElementById('cycle-info').innerText = 'Ciclo ' + weekCycle.cycle + ' — Semana ' + weekCycle.week + ' / 6';
 
-            var html = `<div class="day-selector">`;
-            ['A', 'B', 'C', 'D'].forEach(function(d) {
-                html += `
-                    <div class="day-btn-group">
-                        <button class="day-btn ${d === dayKey ? 'success' : 'secondary'}" onclick="setDay('${d}')">Día ${d}</button>
-                        <button class="edit-btn" onclick="openEditModal('${d}')">✏️</button>
-                    </div>
-                `;
+            var html = '';
+
+            html += '<div class="day-selector">';
+            rotationOrder.forEach(function(day) {
+                var activeClass = (appState.activeDay === day) ? 'primary' : 'secondary';
+                html += '<div class="day-btn-group">';
+                html += '<button class="day-btn ' + activeClass + '" onclick="selectDay(\'' + day + '\')">' + day + '</button>';
+                html += '<button class="edit-btn" onclick="openEditModal(\'' + day + '\')" title="Editar Sesión ' + day + '">✏️</button>';
+                html += '</div>';
             });
-            html += `</div><h2>${routine.name}</h2>`;
+            html += '</div>';
 
-            (routine.exercises || []).forEach(function(ex) {
-                var tipoClase = ex.type === 'aislado' ? 'aislado' : 'compuesto';
-                var tipoTexto = ex.type === 'aislado' ? 'Aislado' : 'Compuesto';
+            var currentExercises = getActiveSessionExercises(appState.activeDay);
+            var sessionName = rutinaBaseStructure[appState.activeDay] ? rutinaBaseStructure[appState.activeDay].name : ('Sesión ' + appState.activeDay);
+            var sessionFocus = rutinaBaseStructure[appState.activeDay] ? rutinaBaseStructure[appState.activeDay].focus : '';
+
+            html += '<div class="card">';
+            html += '<h2 style="margin-bottom:0.2rem;">' + sessionName + '</h2>';
+            if (sessionFocus) html += '<p style="margin:0 0 1rem 0; font-size:0.85rem; color:var(--text-light);">' + sessionFocus + '</p>';
+
+            if (!appState.workoutStarted) {
+                html += '<button class="success" onclick="startWorkout()">▶ Iniciar Entrenamiento</button>';
+            } else {
+                html += '<button class="warning" onclick="cancelWorkout()">⏹ Cancelar Entrenamiento</button>';
+            }
+            html += '</div>';
+
+            currentExercises.forEach(function(ex, exIdx) {
+                var weight = appState.cycleCalculatedWeights[ex.id] || ex.baseWeight || 0;
+                var typeTag = ex.type ? ex.type : 'Compuesto';
                 
-                html += `
-                    <div class="exercise-box">
-                        <div class="exercise-header">
-                            <div>
-                                <div class="exercise-title">${ex.name}</div>
-                                <div class="exercise-meta">
-                                    <span class="meta-pill ${tipoClase}">${tipoTexto}</span>
-                                    <span class="meta-pill">${ex.muscle || 'General'}</span>
-                                    <span class="meta-pill">⏱️ ${ex.defaultRest || 90}s</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                html += '<div class="exercise-box">';
+                html += '<div class="exercise-header">';
+                html += '<div>';
+                html += '<div class="exercise-title">' + (exIdx + 1) + '. ' + ex.name + '</div>';
+                html += '<div class="exercise-meta">';
+                html += '<span class="meta-pill">💪 ' + ex.muscle + '</span>';
+                html += '<span class="meta-pill">🏷️ ' + typeTag + '</span>';
+                html += '<span class="meta-pill">🎯 ' + ex.targetReps + '</span>';
+                html += '<span class="meta-pill">⏱️ ' + ex.defaultRest + 's</span>';
+                if (ex.tempo) html += '<span class="meta-pill">⏳ ' + ex.tempo + '</span>';
+                html += '</div>';
+                html += '</div>';
+                html += '<button class="btn-sm secondary" onclick="toggleTech(' + exIdx + ')">📖 Guía</button>';
+                html += '</div>';
+
+                html += '<div id="tech-' + exIdx + '" class="tech-guide">';
+                if (ex.steps && ex.steps.length) {
+                    html += '<ol class="tech-steps">';
+                    ex.steps.forEach(function(st) { html += '<li>' + st + '</li>'; });
+                    html += '</ol>';
+                } else {
+                    html += '<p style="font-size:0.85rem; color:#cbd5e1; margin:0;">Técnica estándar para este ejercicio.</p>';
+                }
+                html += '</div>';
+
+                html += '<div style="margin-top:1rem;">';
+                for (var s = 1; s <= ex.series; s++) {
+                    var inputKeyReps = appState.activeDay + '_' + ex.id + '_s' + s + '_reps';
+                    var inputKeyWeight = appState.activeDay + '_' + ex.id + '_s' + s + '_weight';
+                    
+                    var valReps = appState.draftInputs[inputKeyReps] !== undefined ? appState.draftInputs[inputKeyReps] : '';
+                    var valWeight = appState.draftInputs[inputKeyWeight] !== undefined ? appState.draftInputs[inputKeyWeight] : weight;
+
+                    var disabled = !appState.workoutStarted ? 'disabled' : '';
+
+                    html += '<div class="series-row">';
+                    html += '<label>Set ' + s + ':</label>';
+                    html += '<input type="number" placeholder="kg" value="' + valWeight + '" ' + disabled + ' onchange="updateDraftInput(\'' + inputKeyWeight + '\', this.value)">';
+                    html += '<span>kg ×</span>';
+                    html += '<input type="number" placeholder="reps" value="' + valReps + '" ' + disabled + ' onchange="updateDraftInput(\'' + inputKeyReps + '\', this.value)">';
+                    html += '<span>reps</span>';
+                    if (appState.workoutStarted) {
+                        html += '<button class="btn-sm secondary" style="margin-left:auto;" onclick="startRestTimer(' + ex.defaultRest + ')">⏱️ Rest</button>';
+                    }
+                    html += '</div>';
+                }
+                html += '</div>';
+                html += '</div>';
+            });
+
+            if (appState.workoutStarted) {
+                html += '<div class="card">';
+                html += '<h3>Finalizar Entrenamiento</h3>';
+                html += '<div style="margin-bottom:1rem;">';
+                html += '<label style="display:block; font-size:0.85rem; color:var(--text-light); margin-bottom:0.4rem;">RPE de la Sesión (1 al 10):</label>';
+                html += '<input type="number" min="1" max="10" placeholder="Ej: 8" value="' + (appState.sessionRPE || '') + '" onchange="appState.sessionRPE = this.value; saveState();" style="width:100%; padding:0.6rem; background:#0f172a; border:1px solid var(--border); color:white; border-radius:8px; box-sizing:border-box;">';
+                html += '</div>';
+                html += '<button class="success" onclick="finishWorkout()">✅ Guardar Entrenamiento</button>';
+                html += '</div>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        function selectDay(day) {
+            appState.activeDay = day;
+            saveState();
+            renderWorkoutView();
+        }
+
+        function toggleTech(idx) {
+            var el = document.getElementById('tech-' + idx);
+            if (el) el.classList.toggle('show');
+        }
+
+        function updateDraftInput(key, val) {
+            appState.draftInputs[key] = val;
+            saveState();
+        }
+
+        function startWorkout() {
+            appState.workoutStarted = true;
+            appState.workoutStartTime = new Date().toISOString();
+            saveState();
+            renderWorkoutView();
+        }
+
+        function cancelWorkout() {
+            if (confirm('¿Seguro que quieres cancelar la sesión actual? Se borrarán los datos introducidos.')) {
+                appState.workoutStarted = false;
+                appState.workoutStartTime = null;
+                appState.draftInputs = {};
+                appState.sessionRPE = '';
+                saveState();
+                stopRestTimer();
+                renderWorkoutView();
+            }
+        }
+
+        function finishWorkout() {
+            var exercises = getActiveSessionExercises(appState.activeDay);
+            var completedExercises = [];
+
+            exercises.forEach(function(ex) {
+                var setsData = [];
+                for (var s = 1; s <= ex.series; s++) {
+                    var kReps = appState.activeDay + '_' + ex.id + '_s' + s + '_reps';
+                    var kWeight = appState.activeDay + '_' + ex.id + '_s' + s + '_weight';
+                    var weightVal = appState.draftInputs[kWeight] !== undefined ? appState.draftInputs[kWeight] : (appState.cycleCalculatedWeights[ex.id] || ex.baseWeight || 0);
+                    var repsVal = appState.draftInputs[kReps];
+
+                    if (repsVal !== undefined && repsVal !== '') {
+                        setsData.push({ set: s, weight: parseFloat(weightVal) || 0, reps: parseInt(repsVal, 10) || 0 });
+                    }
+                }
+                if (setsData.length > 0) {
+                    completedExercises.push({
+                        id: ex.id,
+                        name: ex.name,
+                        muscle: ex.muscle,
+                        type: ex.type || 'Compuesto',
+                        sets: setsData
+                    });
+                }
+            });
+
+            if (completedExercises.length === 0) {
+                alert('Introduce al menos una serie completada para guardar el entrenamiento.');
+                return;
+            }
+
+            var startTime = appState.workoutStartTime ? new Date(appState.workoutStartTime) : new Date();
+            var endTime = new Date();
+            var durationMs = endTime - startTime;
+
+            var historyEntry = {
+                id: 'hist_' + Date.now(),
+                date: new Date().toISOString(),
+                day: appState.activeDay,
+                sessionName: rutinaBaseStructure[appState.activeDay] ? rutinaBaseStructure[appState.activeDay].name : ('Sesión ' + appState.activeDay),
+                durationMs: durationMs,
+                rpe: appState.sessionRPE || 'N/A',
+                exercises: completedExercises
+            };
+
+            appState.history.unshift(historyEntry);
+
+            // Adaptative weight auto-progression
+            completedExercises.forEach(function(exLog) {
+                var maxWeight = 0;
+                var allTargetReached = true;
+                
+                var refEx = null;
+                Object.keys(exerciseEvolutionTree).forEach(function(cat) {
+                    exerciseEvolutionTree[cat].forEach(function(item) {
+                        if (item.id === exLog.id) refEx = item;
+                    });
+                });
+
+                var maxTarget = refEx ? refEx.maxReps : 12;
+
+                exLog.sets.forEach(function(s) {
+                    if (s.weight > maxWeight) maxWeight = s.weight;
+                    if (s.reps < maxTarget) allTargetReached = false;
+                });
+
+                if (maxWeight > 0) {
+                    if (allTargetReached) {
+                        appState.cycleCalculatedWeights[exLog.id] = maxWeight + 2.5;
+                    } else {
+                        appState.cycleCalculatedWeights[exLog.id] = maxWeight;
+                    }
+                }
+            });
+
+            appState.workoutStarted = false;
+            appState.workoutStartTime = null;
+            appState.draftInputs = {};
+            appState.sessionRPE = '';
+
+            var nextIdx = (rotationOrder.indexOf(appState.activeDay) + 1) % rotationOrder.length;
+            appState.activeDay = rotationOrder[nextIdx];
+
+            saveState();
+            stopRestTimer();
+            alert('¡Entrenamiento guardado con éxito!');
+            renderWorkoutView();
+        }
+
+        function renderHistoryView() {
+            var container = document.getElementById('history-content');
+            if (!appState.history || appState.history.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-light); text-align:center; padding:2rem 0;">No hay entrenamientos registrados en el historial.</p>';
+                return;
+            }
+
+            var html = '';
+            appState.history.forEach(function(item) {
+                var d = new Date(item.date);
+                var dateStr = d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                html += '<div class="history-item">';
+                html += '<div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.5rem;">';
+                html += '<div>';
+                html += '<strong style="font-size:1.05rem; color:#f8fafc;">' + (item.sessionName || ('Sesión ' + item.day)) + '</strong>';
+                html += '<div style="font-size:0.8rem; color:var(--text-light); margin-top:0.2rem;">📅 ' + dateStr + '</div>';
+                html += '</div>';
+                html += '<div style="display:flex; gap:0.4rem; flex-wrap:wrap;">';
+                html += '<span class="history-meta-badge">⏱️ ' + formatDuration(item.durationMs) + '</span>';
+                html += '<span class="history-meta-badge">🔥 RPE ' + item.rpe + '</span>';
+                html += '</div>';
+                html += '</div>';
+
+                if (item.exercises && item.exercises.length > 0) {
+                    item.exercises.forEach(function(ex) {
+                        var typeTag = ex.type ? (' • ' + ex.type) : '';
+                        html += '<div class="history-exercise-block">';
+                        html += '<div class="history-exercise-title">' + ex.name + '<span style="font-size:0.75rem; color:var(--text-light); font-weight:normal;"> (' + ex.muscle + typeTag + ')</span></div>';
+                        html += '<div>';
+                        ex.sets.forEach(function(s) {
+                            html += '<span class="history-set-pill">Set ' + s.set + ': ' + s.weight + 'kg × ' + s.reps + '</span>';
+                        });
+                        html += '</div>';
+                        html += '</div>';
+                    });
+                }
+                html += '</div>';
             });
 
             container.innerHTML = html;
         }
 
-        function setDay(day) {
-            appState.activeDay = day;
+        function renderSettingsView() {
+            var startInput = document.getElementById('routine-start-date');
+            var endInput = document.getElementById('routine-end-date');
+            if (startInput) startInput.value = appState.routineStartDate || '';
+            if (endInput) endInput.value = appState.routineEndDate || '';
+        }
+
+        function updateRoutineStartDate(val) {
+            appState.routineStartDate = val;
+            saveState();
+        }
+
+        function updateRoutineEndDate(val) {
+            appState.routineEndDate = val;
+            saveState();
+        }
+
+        function forceCycleEvolution() {
+            appState.cycleNumber = (appState.cycleNumber || 1) + 1;
+            saveState();
+            alert('¡Nuevo ciclo forzado con éxito! Ahora estás en el Ciclo ' + appState.cycleNumber + '.');
             renderWorkoutView();
         }
 
-        function switchView(viewName) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-            document.getElementById('view-' + viewName).classList.add('active');
-            document.getElementById('nav-' + viewName).classList.add('active');
+        function exportBackup() {
+            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+            var downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "gymapp_backup_" + new Date().toISOString().split('T')[0] + ".json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
         }
 
-        renderWorkoutView();
+        function importBackup(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    var parsed = JSON.parse(e.target.result);
+                    appState = normalizeState(parsed);
+                    saveState();
+                    alert('¡Copia de seguridad restaurada con éxito!');
+                    window.location.reload();
+                } catch(err) {
+                    alert('Error al leer el archivo JSON de copia de seguridad.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function exportWorkoutPlan() {
+            var planData = {
+                customRoutines: appState.customRoutines || {}
+            };
+            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(planData, null, 2));
+            var downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "gymapp_plan_" + new Date().toISOString().split('T')[0] + ".json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importWorkoutPlan(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    var parsed = JSON.parse(e.target.result);
+                    if (parsed && typeof parsed === 'object') {
+                        if (parsed.customRoutines) {
+                            appState.customRoutines = parsed.customRoutines;
+                        } else {
+                            appState.customRoutines = parsed;
+                        }
+                        saveState();
+                        alert('¡Plan de entrenamiento cargado correctamente!');
+                        renderWorkoutView();
+                    } else {
+                        alert('Formato de plan no válido.');
+                    }
+                } catch(err) {
+                    alert('Error al procesar el archivo de plan JSON.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetApp() {
+            if (confirm('¿Estás seguro de que deseas borrar TODOS los datos y el historial? Esta acción no se puede deshacer.')) {
+                hardResetApp();
+            }
+        }
+
+        /* MODAL DE EDICIÓN Y PERSONALIZACIÓN DE SESIONES */
+        var editingDayKey = null;
+        var draftEditExercises = [];
+
+        function openEditModal(dayKey) {
+            editingDayKey = dayKey;
+            var currentExs = getActiveSessionExercises(dayKey);
+            draftEditExercises = JSON.parse(JSON.stringify(currentExs));
+
+            document.getElementById('modal-session-title').innerText = 'Editar Sesión ' + dayKey + ' (' + (rutinaBaseStructure[dayKey] ? rutinaBaseStructure[dayKey].name : '') + ')';
+            renderEditModalContent();
+            document.getElementById('edit-session-modal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-session-modal').style.display = 'none';
+            editingDayKey = null;
+            draftEditExercises = [];
+        }
+
+        function renderEditModalContent() {
+            var body = document.getElementById('modal-session-body');
+            var html = '';
+
+            if (draftEditExercises.length === 0) {
+                html += '<p style="color:var(--text-light); text-align:center;">No hay ejercicios en esta sesión.</p>';
+            }
+
+            draftEditExercises.forEach(function(ex, idx) {
+                var currentType = ex.type || 'Compuesto';
+                html += '<div class="edit-ex-card">';
+                html += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">';
+                html += '<strong style="color:#60a5fa; font-size:0.95rem;">Ejercicio #' + (idx + 1) + '</strong>';
+                html += '<button class="btn-sm warning" onclick="removeExerciseFromDraft(' + idx + ')">🗑️ Eliminar</button>';
+                html += '</div>';
+
+                html += '<div class="edit-form-row">';
+                html += '<div style="flex:2;">';
+                html += '<label>Nombre del Ejercicio</label>';
+                html += '<input type="text" value="' + (ex.name || '') + '" onchange="updateDraftExField(' + idx + ', \'name\', this.value)">';
+                html += '</div>';
+                html += '<div>';
+                html += '<label>Músculo Principal</label>';
+                html += '<input type="text" value="' + (ex.muscle || '') + '" onchange="updateDraftExField(' + idx + ', \'muscle\', this.value)">';
+                html += '</div>';
+                html += '</div>';
+
+                html += '<div class="edit-form-row">';
+                html += '<div>';
+                html += '<label>Tipo de Ejercicio</label>';
+                html += '<select onchange="updateDraftExField(' + idx + ', \'type\', this.value)">';
+                html += '<option value="Compuesto"' + (currentType === 'Compuesto' ? ' selected' : '') + '>Compuesto</option>';
+                html += '<option value="Aislado"' + (currentType === 'Aislado' ? ' selected' : '') + '>Aislado</option>';
+                html += '</select>';
+                html += '</div>';
+                html += '<div>';
+                html += '<label>Series</label>';
+                html += '<input type="number" min="1" max="10" value="' + (ex.series || 3) + '" onchange="updateDraftExField(' + idx + ', \'series\', parseInt(this.value, 10))">';
+                html += '</div>';
+                html += '<div>';
+                html += '<label>Rango Reps</label>';
+                html += '<input type="text" value="' + (ex.targetReps || '8-10 reps') + '" onchange="updateDraftExField(' + idx + ', \'targetReps\', this.value)">';
+                html += '</div>';
+                html += '<div>';
+                html += '<label>Descanso (s)</label>';
+                html += '<input type="number" value="' + (ex.defaultRest || 90) + '" onchange="updateDraftExField(' + idx + ', \'defaultRest\', parseInt(this.value, 10))">';
+                html += '</div>';
+                html += '<div>';
+                html += '<label>Peso Base (kg)</label>';
+                html += '<input type="number" value="' + (ex.baseWeight || 0) + '" onchange="updateDraftExField(' + idx + ', \'baseWeight\', parseFloat(this.value))">';
+                html += '</div>';
+                html += '</div>';
+
+                html += '</div>';
+            });
+
+            body.innerHTML = html;
+        }
+
+        function updateDraftExField(idx, field, val) {
+            if (draftEditExercises[idx]) {
+                draftEditExercises[idx][field] = val;
+            }
+        }
+
+        function removeExerciseFromDraft(idx) {
+            draftEditExercises.splice(idx, 1);
+            renderEditModalContent();
+        }
+
+        function addExerciseToDraft() {
+            var newEx = {
+                id: 'custom_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                name: 'Nuevo Ejercicio',
+                muscle: 'General',
+                type: 'Compuesto',
+                series: 3,
+                minReps: 8,
+                maxReps: 12,
+                targetReps: '8-12 reps',
+                defaultRest: 90,
+                baseWeight: 20,
+                tempo: '2-0-1-0',
+                steps: ['Ejecuta con buena forma y rango completo.']
+            };
+            draftEditExercises.push(newEx);
+            renderEditModalContent();
+        }
+
+        function saveSessionCustomization() {
+            if (!editingDayKey) return;
+            if (!appState.customRoutines) appState.customRoutines = {};
+            appState.customRoutines[editingDayKey] = JSON.parse(JSON.stringify(draftEditExercises));
+            saveState();
+            closeEditModal();
+            renderWorkoutView();
+            alert('¡Sesión ' + editingDayKey + ' personalizada guardada correctamente!');
+        }
+
+        function resetSessionToDefault() {
+            if (!editingDayKey) return;
+            if (confirm('¿Restablecer esta sesión al diseño base original?')) {
+                if (appState.customRoutines && appState.customRoutines[editingDayKey]) {
+                    delete appState.customRoutines[editingDayKey];
+                    saveState();
+                }
+                closeEditModal();
+                renderWorkoutView();
+            }
+        }
+
+        // Inicialización al cargar
+        window.addEventListener('DOMContentLoaded', function() {
+            renderWorkoutView();
+        });
     </script>
-</body>
-</html>
+</body></html>
