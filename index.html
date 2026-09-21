@@ -364,6 +364,22 @@
         <!-- VISTA 2: HISTORIAL -->
         <div id="view-history" class="view">
             <h2>Historial de Entrenamientos</h2>
+            
+            <!-- NUEVA SECCIÓN PARA CARGAR/DESCARGAR PLAN DE 6 SEMANAS SIN BORRAR HISTORIAL -->
+            <div class="card" style="border-color: var(--primary);">
+                <h3 style="margin-top:0; color:#60a5fa;">📅 Programación de Entrenamientos (6 Semanas)</h3>
+                <p style="font-size:0.85rem; color:var(--text-light); margin-bottom: 0.8rem;">
+                    Descarga la plantilla para diseñarla en tu ordenador o carga un archivo JSON de entrenamientos para actualizarlos. <strong>El historial guardado NO se borrará.</strong>
+                </p>
+                <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+                    <label class="btn-upload" style="flex:1; margin:0; cursor:pointer; background: #2563eb;">
+                        📥 Cargar Plan (.json)
+                        <input type="file" id="import-plan-file" accept=".json" onchange="importWorkoutPlan(event)" style="display:none;">
+                    </label>
+                    <button class="secondary" style="flex:1;" onclick="exportWorkoutPlan()">📤 Descargar Plantilla (.json)</button>
+                </div>
+            </div>
+
             <div id="history-content"></div>
         </div>
 
@@ -385,11 +401,11 @@
             </div>
 
             <div class="card">
-                <h3>Copia de Seguridad (Backup)</h3>
+                <h3>Copia de Seguridad Completa (Backup)</h3>
                 <div style="display:flex; flex-direction:column; gap:0.6rem;">
-                    <button class="secondary" onclick="exportBackup()">📥 Descargar Backup (.json)</button>
+                    <button class="secondary" onclick="exportBackup()">📥 Descargar Backup Completo (.json)</button>
                     <label class="btn-upload">
-                        📤 Restaurar Backup (.json)
+                        📤 Restaurar Backup Completo (.json)
                         <input type="file" id="import-file" accept=".json" onchange="importBackup(event)" style="display:none;">
                     </label>
                 </div>
@@ -529,7 +545,6 @@
             ]
         };
 
-        /* NUEVA ESTRUCTURA SOLICITADA */
         var rutinaBaseStructure = {
             'A': { 
                 name: 'Sesión A: Empuje (Pecho, Hombro, Tríceps)', 
@@ -956,6 +971,72 @@
             switchView('history');
         }
 
+        /* DESCARGAR / CARGAR PLAN DE ENTRENAMIENTO SIN TOCAR HISTORIAL */
+        function exportWorkoutPlan() {
+            try {
+                var cycleInfo = getNaturalWeekAndCycle();
+                var planExport = {
+                    fileType: "GymApp_WorkoutPlan",
+                    version: "4.0",
+                    customRoutines: {}
+                };
+
+                for (var i = 0; i < rotationOrder.length; i++) {
+                    var day = rotationOrder[i];
+                    planExport.customRoutines[day] = getEvolvedWorkoutForCycle(day, cycleInfo.cycle);
+                }
+
+                var dataStr = JSON.stringify(planExport, null, 2);
+                var blob = new Blob([dataStr], { type: 'application/json' });
+                var url = URL.createObjectURL(blob);
+                
+                var link = document.createElement('a');
+                var fecha = new Date().toISOString().split('T')[0];
+                link.href = url;
+                link.download = 'Plan_Entrenamientos_6Semanas_' + fecha + '.json';
+                
+                document.body.appendChild(link);
+                link.click();
+                
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                alert("Error al exportar la plantilla: " + e.message);
+            }
+        }
+
+        function importWorkoutPlan(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    var importedData = JSON.parse(e.target.result);
+                    if (!importedData || typeof importedData !== 'object') {
+                        throw new Error("Archivo JSON inválido.");
+                    }
+
+                    var newRoutines = importedData.customRoutines || importedData;
+
+                    if (!newRoutines || typeof newRoutines !== 'object') {
+                        throw new Error("El archivo no contiene rutinas válidas.");
+                    }
+
+                    // Se actualizan únicamente las rutinas a realizar
+                    appState.customRoutines = newRoutines;
+
+                    // El historial se mantiene 100% intacto sin modificar appState.history
+                    saveState();
+                    alert("¡Plan de entrenamientos actualizado con éxito! Tu historial guardado se ha mantenido intacto.");
+                    location.reload();
+                } catch (err) {
+                    alert("Error al cargar el plan de entrenamiento: " + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
         /* HISTORIAL */
         function renderHistoryView() {
             var container = document.getElementById('history-content');
@@ -1038,7 +1119,7 @@
                 var link = document.createElement('a');
                 var fecha = new Date().toISOString().split('T')[0];
                 link.href = url;
-                link.download = 'Gymapp_Backup_' + fecha + '.json';
+                link.download = 'Gymapp_BackupCompleto_' + fecha + '.json';
                 
                 document.body.appendChild(link);
                 link.click();
