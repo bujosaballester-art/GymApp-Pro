@@ -521,6 +521,16 @@
         function updateExerciseField(index, field, value) {
             if (draftExercises[index]) {
                 draftExercises[index][field] = value;
+
+                // Lógica de descanso automático al cambiar el tipo de ejercicio
+                if (field === 'type') {
+                    if (value === 'compuesto') {
+                        draftExercises[index].defaultRest = 150;
+                    } else if (value === 'aislado') {
+                        draftExercises[index].defaultRest = 75;
+                    }
+                    renderModalBody();
+                }
             }
         }
 
@@ -531,7 +541,7 @@
                 muscle: 'General',
                 series: 3,
                 targetReps: '10-12 reps',
-                defaultRest: 90
+                defaultRest: 150
             });
             renderModalBody();
         }
