@@ -371,7 +371,7 @@
         <div id="view-settings" class="view">
             <h2>Configuración e Inteligencia del Entrenador</h2>
 
-            <!-- SECCIÓN: CARGAR/DESCARGAR PLAN DE 6 SEMANAS SIN BORRAR HISTORIAL -->
+            <!-- SECCIÓN: PROGRAMACIÓN DE ENTRENAMIENTOS -->
             <div class="card" style="border-color: var(--primary);">
                 <h3 style="margin-top:0; color:#60a5fa;">📅 Programación de Entrenamientos (6 Semanas)</h3>
                 <p style="font-size:0.85rem; color:var(--text-light); margin-bottom: 0.8rem;">
@@ -385,6 +385,25 @@
                     <button class="secondary" style="flex:1;" onclick="exportWorkoutPlan()">📤 Descargar Plantilla (.json)</button>
                 </div>
             </div>
+
+            <!-- SECCIÓN: CONTROL DE FECHAS (MODIFICADO) -->
+            <div class="card">
+                <h3>Fechas del Programa y Rutina</h3>
+                <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                    <div>
+                        <label style="font-size:0.85rem; color:var(--text-light); display:block; margin-bottom:0.3rem;">Fecha de Inicio del Programa</label>
+                        <input type="date" id="cycle-start-date" style="padding:0.6rem; font-size:1rem; width:100%; box-sizing:border-box; background:#0f172a; color:white; border:1px solid var(--border); border-radius:8px;" onchange="updateStartDate(this.value)">
+                    </div>
+                    <div>
+                        <label style="font-size:0.85rem; color:var(--text-light); display:block; margin-bottom:0.3rem;">Fecha Inicio Rutina</label>
+                        <input type="date" id="routine-start-date" style="padding:0.6rem; font-size:1rem; width:100%; box-sizing:border-box; background:#0f172a; color:white; border:1px solid var(--border); border-radius:8px;" onchange="updateRoutineStartDate(this.value)">
+                    </div>
+                    <div>
+                        <label style="font-size:0.85rem; color:var(--text-light); display:block; margin-bottom:0.3rem;">Fecha Fin Rutina</label>
+                        <input type="date" id="routine-end-date" style="padding:0.6rem; font-size:1rem; width:100%; box-sizing:border-box; background:#0f172a; color:white; border:1px solid var(--border); border-radius:8px;" onchange="updateRoutineEndDate(this.value)">
+                    </div>
+                </div>
+            </div>
             
             <div class="card">
                 <h3>Avanzar de Ciclo Manualmente</h3>
@@ -392,11 +411,6 @@
                     Activa manualmente un nuevo ciclo y conserva el historial y las cargas calculadas anteriores.
                 </p>
                 <button onclick="forceCycleEvolution()" class="secondary" style="background:#6b21a8;">🚀 Forzar / Recalcular Siguiente Ciclo</button>
-            </div>
-
-            <div class="card">
-                <h3>Fecha de Inicio del Programa</h3>
-                <input type="date" id="cycle-start-date" style="padding:0.6rem; font-size:1rem; width:100%; box-sizing:border-box; background:#0f172a; color:white; border:1px solid var(--border); border-radius:8px;" onchange="updateStartDate(this.value)">
             </div>
 
             <div class="card">
@@ -572,6 +586,8 @@
 
         var defaultAppState = {
             startDate: new Date().toISOString().split('T')[0],
+            routineStartDate: new Date().toISOString().split('T')[0],
+            routineEndDate: '',
             history: [],
             cycleNumber: 1,
             cycleCalculatedWeights: {},
@@ -587,6 +603,8 @@
             var source = (raw && typeof raw === 'object') ? raw : {};
             return {
                 startDate: (source.startDate && typeof source.startDate === 'string') ? source.startDate : defaultAppState.startDate,
+                routineStartDate: (source.routineStartDate && typeof source.routineStartDate === 'string') ? source.routineStartDate : (source.startDate || defaultAppState.routineStartDate),
+                routineEndDate: (source.routineEndDate && typeof source.routineEndDate === 'string') ? source.routineEndDate : '',
                 history: Array.isArray(source.history) ? source.history : [],
                 cycleNumber: Number(source.cycleNumber) || 1,
                 cycleCalculatedWeights: (source.cycleCalculatedWeights && typeof source.cycleCalculatedWeights === 'object') ? source.cycleCalculatedWeights : {},
@@ -1022,10 +1040,8 @@
                         throw new Error("El archivo no contiene rutinas válidas.");
                     }
 
-                    // Se actualizan únicamente las rutinas a realizar
                     appState.customRoutines = newRoutines;
 
-                    // El historial se mantiene 100% intacto sin modificar appState.history
                     saveState();
                     alert("¡Plan de entrenamientos actualizado con éxito! Tu historial guardado se ha mantenido intacto.");
                     location.reload();
@@ -1090,7 +1106,13 @@
         /* AJUSTES */
         function renderSettingsView() {
             var inputEl = document.getElementById('cycle-start-date');
-            if (inputEl) inputEl.value = appState.startDate;
+            if (inputEl) inputEl.value = appState.startDate || '';
+
+            var rStartEl = document.getElementById('routine-start-date');
+            if (rStartEl) rStartEl.value = appState.routineStartDate || '';
+
+            var rEndEl = document.getElementById('routine-end-date');
+            if (rEndEl) rEndEl.value = appState.routineEndDate || '';
         }
 
         function updateStartDate(newDate) {
@@ -1098,6 +1120,16 @@
             appState.startDate = newDate;
             saveState();
             renderHeaderInfo();
+        }
+
+        function updateRoutineStartDate(newDate) {
+            appState.routineStartDate = newDate;
+            saveState();
+        }
+
+        function updateRoutineEndDate(newDate) {
+            appState.routineEndDate = newDate;
+            saveState();
         }
 
         function forceCycleEvolution() {
