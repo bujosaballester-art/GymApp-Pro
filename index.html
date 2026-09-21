@@ -159,7 +159,6 @@
             color: var(--text-muted);
         }
 
-        /* Tabla de series dentro del ejercicio */
         .set-row {
             display: grid;
             grid-template-columns: 50px 1fr 1fr auto;
@@ -308,12 +307,21 @@
                 <input type="date" id="rutinaFin" onchange="saveSettings()">
             </div>
 
-            <h2>Copias de Seguridad</h2>
+            <h2>Copiar Entrenos</h2>
             <div class="card">
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Exporta tus entrenamientos actuales o restaura una copia anterior (el historial no se altera).</p>
-                <button class="btn btn-secondary" style="margin-bottom: 8px;" onclick="exportBackup()">Guardar / Exportar Copia</button>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Exporta o importa únicamente los ejercicios y días de entrenamiento (el historial no se altera).</p>
+                <button class="btn btn-secondary" style="margin-bottom: 8px;" onclick="exportWorkoutsOnly()">Exportar Entrenos</button>
                 <label class="btn btn-secondary" style="display:block; text-align:center; cursor:pointer;">
-                    Restaurar Copia <input type="file" id="importFile" style="display:none" onchange="importBackup(event)">
+                    Importar Entrenos <input type="file" id="importWorkoutsFile" style="display:none" onchange="importWorkoutsOnly(event)">
+                </label>
+            </div>
+
+            <h2>Copia de Seguridad Completa</h2>
+            <div class="card">
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Exporta o restaura tanto los entrenamientos como todo el historial de sesiones.</p>
+                <button class="btn btn-secondary" style="margin-bottom: 8px;" onclick="exportFullBackup()">Crear Copia Completa</button>
+                <label class="btn btn-secondary" style="display:block; text-align:center; cursor:pointer;">
+                    Restaurar Copia Completa <input type="file" id="importFullFile" style="display:none" onchange="importFullBackup(event)">
                 </label>
             </div>
         </section>
@@ -351,7 +359,7 @@
         let currentDay = 1;
         let activeWorkoutStart = null;
         let timerInterval = null;
-        let workoutLogs = {}; // Almacena temporalmente pesos/reps introducidos en el entreno activo
+        let workoutLogs = {};
 
         function switchTab(tabId, event) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -416,11 +424,10 @@
 
         function selectDay(day) {
             currentDay = day;
-            workoutLogs = {}; // Reinicia registros visuales al cambiar de día en caliente
+            workoutLogs = {};
             renderEntreno();
         }
 
-        // Temporizador robusto ante bloqueo de pantalla con timestamp
         function startTimer(seconds) {
             stopTimer();
             const display = document.getElementById('timerDisplay');
@@ -464,7 +471,6 @@
                 
                 const dayString = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth()+1).toString().padStart(2, '0')}/${now.getFullYear()}`;
                 
-                // Recopilar desglose completo de ejercicios
                 let sessionExercises = [];
                 workouts[currentDay].exercises.forEach((ex, exIdx) => {
                     let exerciseRecord = { name: ex.name, sets: [] };
@@ -541,18 +547,52 @@
             localStorage.setItem('gym_settings', JSON.stringify(settings));
         }
 
-        function exportBackup() {
-            const backupObj = { workouts, settings };
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupObj));
+        // 1. Copiar / Importar solo Entrenos
+        function exportWorkoutsOnly() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(workouts));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "gym_backup.json");
+            downloadAnchor.setAttribute("download", "mis_entrenos.json");
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
         }
 
-        function importBackup(event) {
+        function importWorkoutsOnly(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if(imported && imported[1]) {
+                        workouts = imported;
+                        localStorage.setItem('gym_workouts', JSON.stringify(workouts));
+                        renderEntreno();
+                        alert("Entrenos copiados y restaurados con éxito (el historial no se ha modificado).");
+                    } else {
+                        alert("El archivo no tiene el formato de entrenos correcto.");
+                    }
+                } catch(err) {
+                    alert("Error al leer el archivo.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // 2. Copia de Seguridad Completa (Entrenos + Historial + Ajustes)
+        function exportFullBackup() {
+            const backupObj = { workouts, historyData, settings };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupObj));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "gym_copia_seguridad_completa.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importFullBackup(event) {
             const file = event.target.files[0];
             if(!file) return;
             const reader = new FileReader();
@@ -563,15 +603,19 @@
                         workouts = imported.workouts;
                         localStorage.setItem('gym_workouts', JSON.stringify(workouts));
                     }
+                    if(imported.historyData) {
+                        historyData = imported.historyData;
+                        localStorage.setItem('gym_history', JSON.stringify(historyData));
+                    }
                     if(imported.settings) {
                         settings = imported.settings;
                         localStorage.setItem('gym_settings', JSON.stringify(settings));
                         loadSettings();
                     }
                     renderEntreno();
-                    alert("Copia de seguridad cargada correctamente. El historial se ha mantenido intacto.");
+                    alert("Copia de seguridad completa restaurada correctamente.");
                 } catch(err) {
-                    alert("El archivo no es válido.");
+                    alert("El archivo de copia de seguridad no es válido.");
                 }
             };
             reader.readAsText(file);
