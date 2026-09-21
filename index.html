@@ -364,8 +364,14 @@
         <!-- VISTA 2: HISTORIAL -->
         <div id="view-history" class="view">
             <h2>Historial de Entrenamientos</h2>
-            
-            <!-- NUEVA SECCIÓN PARA CARGAR/DESCARGAR PLAN DE 6 SEMANAS SIN BORRAR HISTORIAL -->
+            <div id="history-content"></div>
+        </div>
+
+        <!-- VISTA 3: AJUSTES / CONFIGURACIÓN -->
+        <div id="view-settings" class="view">
+            <h2>Configuración e Inteligencia del Entrenador</h2>
+
+            <!-- SECCIÓN: CARGAR/DESCARGAR PLAN DE 6 SEMANAS SIN BORRAR HISTORIAL -->
             <div class="card" style="border-color: var(--primary);">
                 <h3 style="margin-top:0; color:#60a5fa;">📅 Programación de Entrenamientos (6 Semanas)</h3>
                 <p style="font-size:0.85rem; color:var(--text-light); margin-bottom: 0.8rem;">
@@ -379,13 +385,6 @@
                     <button class="secondary" style="flex:1;" onclick="exportWorkoutPlan()">📤 Descargar Plantilla (.json)</button>
                 </div>
             </div>
-
-            <div id="history-content"></div>
-        </div>
-
-        <!-- VISTA 3: AJUSTES -->
-        <div id="view-settings" class="view">
-            <h2>Configuración e Inteligencia del Entrenador</h2>
             
             <div class="card">
                 <h3>Avanzar de Ciclo Manualmente</h3>
