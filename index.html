@@ -405,18 +405,22 @@
             </div>
 
             <div class="card">
-                <h3>Copia de Seguridad (Backup)</h3>
-                <div style="display:flex; flex-direction:column; gap:0.6rem;">
-                    <button class="secondary" onclick="exportBackup()">📥 Descargar Backup (.json)</button>
+                <h3>Sincronización (PC ➔ Móvil)</h3>
+                <p style="font-size:0.85rem; color:var(--text-light);">
+                    Haz tus entrenos en el ordenador, descarga el archivo de respaldo y súbelo en tu móvil en esta misma sección.
+                </p>
+                <div style="display:flex; flex-direction:column; gap:0.6rem; margin-top:0.8rem;">
+                    <button class="success" onclick="exportBackup()">📥 Descargar Backup (.json)</button>
                     <label class="btn-upload">
-                        📤 Restaurar Backup (.json)
+                        📤 Cargar Backup en este Dispositivo
                         <input type="file" id="import-file" accept=".json" onchange="importBackup(event)" style="display:none;">
                     </label>
                 </div>
             </div>
 
             <div class="card">
-                <h3>Reset de Datos</h3>
+                <h3>Solución de Problemas / Caché</h3>
+                <button class="secondary" onclick="forceReloadApp()" style="margin-bottom:0.6rem;">🔄 Forzar Recarga Limpia</button>
                 <button class="warning" onclick="resetApp()">⚠️ Borrar Todo y Reiniciar</button>
             </div>
         </div>
@@ -924,7 +928,7 @@
 
             saveState();
             stopRestTimer();
-            alert("¡Entrenamiento guardado con éxito!");
+            alert("¡Entrenamiento guardado con éxito! Recuerda descargar tu copia de seguridad en Ajustes si quieres pasarla al móvil.");
             switchView('history');
         }
 
@@ -1022,6 +1026,10 @@
                 }
             };
             reader.readAsText(file);
+        }
+
+        function forceReloadApp() {
+            location.reload();
         }
 
         function resetApp() {
