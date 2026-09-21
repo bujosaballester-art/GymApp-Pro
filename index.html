@@ -828,7 +828,7 @@
                             </div>
                         ` : ''}
 
-                        <div style="margin-top:1rem;">
+                        <div style="margin-top:1.0rem;">
                             ${Array.from({ length: ex.series || 3 }).map((_, sIdx) => {
                                 const inputKeyWeight = `${exKey}_s${sIdx}_w`;
                                 const inputKeyReps = `${exKey}_s${sIdx}_r`;
@@ -904,9 +904,12 @@
                 return { name: ex.name, sets };
             });
 
+            const now = new Date();
+            const formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()} a las ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
             const historyRecord = {
                 id: Date.now(),
-                date: new Date().toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }),
+                date: formattedDate,
                 day: appState.activeDay,
                 name: currentWorkout.name,
                 durationMs,
@@ -924,8 +927,16 @@
 
             saveState();
             stopRestTimer();
-            alert("¡Entrenamiento guardado con éxito! Recuerda descargar tu copia de seguridad en Ajustes si quieres pasarla al móvil.");
+            alert("¡Entrenamiento guardado con éxito!");
             switchView('history');
+        }
+
+        function deleteHistoryItem(id) {
+            if (confirm("¿Estás seguro de que deseas eliminar este entrenamiento del historial?")) {
+                appState.history = appState.history.filter(item => item.id !== id);
+                saveState();
+                renderHistoryView();
+            }
         }
 
         function renderHistoryView() {
@@ -938,11 +949,12 @@
             container.innerHTML = appState.history.map(item => `
                 <div class="history-item">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
-                        <strong>${item.name}</strong>
-                        <span style="font-size:0.8rem; color:var(--text-light);">${item.date}</span>
+                        <strong style="font-size:1.05rem; color:#f8fafc;">${item.name}</strong>
+                        <button class="btn-sm warning" onclick="deleteHistoryItem(${item.id})">🗑️ Eliminar</button>
                     </div>
-                    <div style="margin-top:0.5rem; display:flex; gap:0.4rem; flex-wrap:wrap;">
-                        <span class="history-meta-badge">⏱️ ${formatDuration(item.durationMs)}</span>
+                    <div style="margin-top:0.6rem; display:flex; gap:0.5rem; flex-wrap:wrap;">
+                        <span class="history-meta-badge">📅 ${item.date}</span>
+                        <span class="history-meta-badge">⏱️ Duración: ${formatDuration(item.durationMs)}</span>
                         <span class="history-meta-badge">⚡ Energía: ${item.readiness}/5</span>
                     </div>
                     ${item.exercises ? item.exercises.map(ex => `
