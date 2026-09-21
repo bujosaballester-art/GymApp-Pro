@@ -547,7 +547,6 @@
             localStorage.setItem('gym_settings', JSON.stringify(settings));
         }
 
-        // 1. Copiar / Importar solo Entrenos
         function exportWorkoutsOnly() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(workouts));
             const downloadAnchor = document.createElement('a');
@@ -580,7 +579,6 @@
             reader.readAsText(file);
         }
 
-        // 2. Copia de Seguridad Completa (Entrenos + Historial + Ajustes)
         function exportFullBackup() {
             const backupObj = { workouts, historyData, settings };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupObj));
@@ -621,6 +619,7 @@
             reader.readAsText(file);
         }
 
+        // Corrección aplicada aquí para evitar desajustes al editar/añadir ejercicios
         function openEditDay() {
             document.getElementById('editModalTitle').textContent = `Editar ${workouts[currentDay].title}`;
             renderEditExercises();
@@ -637,23 +636,23 @@
             container.innerHTML = '';
             workouts[currentDay].exercises.forEach((ex, idx) => {
                 container.innerHTML += `
-                    <div style="background:#222; padding:10px; margin-bottom:10px; border-radius:6px;">
+                    <div class="edit-exercise-item" data-index="${idx}" style="background:#222; padding:10px; margin-bottom:10px; border-radius:6px;">
                         <label>Nombre Ejercicio:</label>
-                        <input type="text" id="ex_name_${idx}" value="${ex.name}">
+                        <input type="text" class="edit-name" value="${ex.name}">
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 5px;">
                             <div>
                                 <label>Series:</label>
-                                <input type="number" id="ex_sets_${idx}" value="${ex.sets}">
+                                <input type="number" class="edit-sets" value="${ex.sets}">
                             </div>
                             <div>
                                 <label>Descanso (s):</label>
-                                <input type="number" id="ex_rest_${idx}" value="${ex.rest}">
+                                <input type="number" class="edit-rest" value="${ex.rest}">
                             </div>
                         </div>
                         <label>Repeticiones (Base):</label>
-                        <input type="text" id="ex_reps_${idx}" value="${ex.reps}">
+                        <input type="text" class="edit-reps" value="${ex.reps}">
                         <label>Tipo:</label>
-                        <select id="ex_type_${idx}">
+                        <select class="edit-type">
                             <option value="Compuesto" ${ex.type === 'Compuesto' ? 'selected' : ''}>Compuesto</option>
                             <option value="Aislado" ${ex.type === 'Aislado' ? 'selected' : ''}>Aislado</option>
                         </select>
@@ -664,23 +663,33 @@
         }
 
         function addExerciseToCurrentDay() {
+            // Guardar cambios actuales antes de añadir para no perder nada escrito
+            syncEditFormToMemory();
             workouts[currentDay].exercises.push({ name: "Nuevo Ejercicio", type: "Compuesto", sets: 3, reps: "10", rest: 60 });
             renderEditExercises();
         }
 
         function removeExercise(idx) {
+            syncEditFormToMemory();
             workouts[currentDay].exercises.splice(idx, 1);
             renderEditExercises();
         }
 
-        function saveEditedDay() {
-            workouts[currentDay].exercises.forEach((ex, idx) => {
-                ex.name = document.getElementById(`ex_name_${idx}`).value;
-                ex.sets = parseInt(document.getElementById(`ex_sets_${idx}`).value) || 1;
-                ex.reps = document.getElementById(`ex_reps_${idx}`).value;
-                ex.rest = parseInt(document.getElementById(`ex_rest_${idx}`).value) || 60;
-                ex.type = document.getElementById(`ex_type_${idx}`).value;
+        function syncEditFormToMemory() {
+            const items = document.querySelectorAll('.edit-exercise-item');
+            items.forEach((item, idx) => {
+                if(workouts[currentDay].exercises[idx]) {
+                    workouts[currentDay].exercises[idx].name = item.querySelector('.edit-name').value;
+                    workouts[currentDay].exercises[idx].sets = parseInt(item.querySelector('.edit-sets').value) || 1;
+                    workouts[currentDay].exercises[idx].rest = parseInt(item.querySelector('.edit-rest').value) || 60;
+                    workouts[currentDay].exercises[idx].reps = item.querySelector('.edit-reps').value;
+                    workouts[currentDay].exercises[idx].type = item.querySelector('.edit-type').value;
+                }
             });
+        }
+
+        function saveEditedDay() {
+            syncEditFormToMemory();
             localStorage.setItem('gym_workouts', JSON.stringify(workouts));
             closeEditDay();
             alert("Rutina actualizada correctamente.");
