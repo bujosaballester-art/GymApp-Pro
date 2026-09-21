@@ -569,7 +569,6 @@
             workoutStarted: false,
             workoutStartTime: null,
             activeDay: 'A',
-            readinessScore: 3,
             sessionRPE: '',
             draftInputs: {}
         };
@@ -586,7 +585,6 @@
                 activeDay: (source.activeDay && rotationOrder.indexOf(source.activeDay) !== -1) ? source.activeDay : 'A',
                 workoutStarted: Boolean(source.workoutStarted),
                 workoutStartTime: source.workoutStartTime || null,
-                readinessScore: Number(source.readinessScore) || 3,
                 sessionRPE: source.sessionRPE || ''
             };
         }
@@ -828,16 +826,6 @@
                         '<p style="margin:0.4rem 0 0 0; font-size:0.85rem; color:#dbeafe;">Foco: ' + currentWorkout.focus + '</p>' +
                     '</div>';
 
-            html += '<div class="card">' +
-                        '<label style="font-size:0.85rem; color:var(--text-light); display:block; margin-bottom:0.4rem;">Estado de Disposición hoy:</label>' +
-                        '<div style="display:flex; gap:0.4rem;">';
-            var emojis = ['😫', '🥱', '😐', '😃', '🔥'];
-            for (var s = 1; s <= 5; s++) {
-                html += '<button class="' + (appState.readinessScore === s ? '' : 'secondary') + '" style="flex:1; padding:0.5rem;" onclick="setReadiness(' + s + ')">' + emojis[s-1] + '</button>';
-            }
-            html +=     '</div>' +
-                    '</div>';
-
             html += '<div style="margin-bottom:1.2rem;">' +
                         (!appState.workoutStarted ?
                             '<button class="success" onclick="startWorkout()">▶️ Iniciar Entrenamiento</button>' :
@@ -910,12 +898,6 @@
             renderWorkoutView();
         }
 
-        function setReadiness(score) {
-            appState.readinessScore = score;
-            saveState();
-            renderWorkoutView();
-        }
-
         function saveDraftInput(key, val) {
             appState.draftInputs[key] = val;
             saveState();
@@ -963,7 +945,6 @@
                 day: appState.activeDay,
                 name: currentWorkout.name,
                 durationMs: durationMs,
-                readiness: appState.readinessScore,
                 rpe: appState.sessionRPE || 'N/A',
                 exercises: exercisesRecorded
             };
@@ -1004,7 +985,7 @@
                             '</div>' +
                             '<div style="margin-top:0.5rem; display:flex; gap:0.4rem; flex-wrap:wrap;">' +
                                 '<span class="history-meta-badge">⏱️ ' + formatDuration(item.durationMs) + '</span>' +
-                                '<span class="history-meta-badge">⚡ Energía: ' + item.readiness + '/5</span>' +
+                                (item.readiness ? '<span class="history-meta-badge">⚡ Energía: ' + item.readiness + '/5</span>' : '') +
                                 '<span class="history-meta-badge">📊 RPE: ' + item.rpe + '</span>' +
                             '</div>';
 
