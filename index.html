@@ -314,6 +314,15 @@
                 </label>
             </div>
 
+            <h2>Copiar Historial</h2>
+            <div class="card">
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Exporta o restaura únicamente el historial de entrenamientos.</p>
+                <button class="btn btn-secondary" style="margin-bottom: 8px;" onclick="exportHistoryOnly()">Exportar Historial</button>
+                <label class="btn btn-secondary" style="display:block; text-align:center; cursor:pointer;">
+                    Restaurar Historial <input type="file" id="importHistoryFile" style="display:none" onchange="importHistoryOnly(event)">
+                </label>
+            </div>
+
             <h2>Copia de Seguridad Completa</h2>
             <div class="card">
                 <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Exporta o restaura tanto los entrenamientos como todo el historial de sesiones.</p>
@@ -597,6 +606,35 @@
                         alert("Entrenos copiados y restaurados con éxito (el historial no se ha modificado).");
                     } else {
                         alert("El archivo no tiene el formato de entrenos correcto.");
+                    }
+                } catch(err) {
+                    alert("Error al leer el archivo.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function exportHistoryOnly() {
+            const dataStr = JSON.stringify(historyData, null, 2);
+            downloadFile(dataStr, "mi_historial.json", "application/json");
+        }
+
+        function importHistoryOnly(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if(Array.isArray(imported)) {
+                        historyData = imported;
+                        localStorage.setItem('gym_history', JSON.stringify(historyData));
+                        if(document.getElementById('historial').classList.contains('active')) {
+                            renderHistory();
+                        }
+                        alert("Historial restaurado con éxito.");
+                    } else {
+                        alert("El archivo no tiene el formato de historial correcto.");
                     }
                 } catch(err) {
                     alert("Error al leer el archivo.");
