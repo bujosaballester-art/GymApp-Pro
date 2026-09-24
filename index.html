@@ -411,20 +411,14 @@
                 
                 let setsHtml = '';
                 for(let s = 0; s < ex.sets; s++) {
-                    // CORRECCIÓN: Asegura que el valor por defecto sea el rango completo si está vacío
-                    if(!workoutLogs[exIdx][s]) {
-                        workoutLogs[exIdx][s] = { weight: '', reps: ex.reps };
-                    } else if (workoutLogs[exIdx][s].reps === undefined || workoutLogs[exIdx][s].reps === '') {
-                        workoutLogs[exIdx][s].reps = ex.reps;
-                    }
-                    
+                    if(!workoutLogs[exIdx][s]) workoutLogs[exIdx][s] = { weight: '', reps: '' };
                     let log = workoutLogs[exIdx][s];
                     
                     setsHtml += `
                         <div class="set-row">
                             <span>S${s+1}</span>
                             <input type="number" placeholder="Kg" value="${log.weight}" oninput="updateLog(${exIdx}, ${s}, 'weight', this.value)">
-                            <input type="text" placeholder="Reps (Obj: ${ex.reps})" value="${log.reps}" oninput="updateLog(${exIdx}, ${s}, 'reps', this.value)" title="Objetivo: ${ex.reps} reps">
+                            <input type="text" placeholder="${ex.reps}" value="${log.reps}" oninput="updateLog(${exIdx}, ${s}, 'reps', this.value)" title="Objetivo: ${ex.reps} reps">
                             <button class="btn btn-secondary" style="padding:4px 6px; font-size:0.7rem;" onclick="startTimer(${ex.rest})">⏱</button>
                         </div>
                     `;
@@ -509,7 +503,9 @@
                     if(workoutLogs[exIdx]) {
                         workoutLogs[exIdx].forEach((log, sIdx) => {
                             if(log) {
-                                exerciseRecord.sets.push({ setNum: sIdx + 1, weight: log.weight || '0', reps: log.reps || '0' });
+                                // Si el usuario deja el input de reps vacío, guardamos el objetivo por defecto (o '0' si prefieres)
+                                let repsVal = (log.reps && log.reps.trim() !== '') ? log.reps : ex.reps;
+                                exerciseRecord.sets.push({ setNum: sIdx + 1, weight: log.weight || '0', reps: repsVal });
                             }
                         });
                     }
