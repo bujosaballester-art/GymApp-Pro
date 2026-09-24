@@ -51,7 +51,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 15px;
-            padding-bottom: 140px; /* Espacio extra para el timer flotante */
+            padding-bottom: 140px;
         }
 
         .tab-content {
@@ -178,7 +178,6 @@
             font-size: 0.85rem;
         }
 
-        /* TIMER FLOTANTE SIEMPRE VISIBLE */
         .timer-box {
             position: fixed;
             bottom: 55px;
@@ -193,7 +192,7 @@
             text-align: center;
             z-index: 999;
             box-shadow: 0 -4px 10px rgba(0,0,0,0.5);
-            display: none; /* Se muestra solo al iniciar el timer */
+            display: none;
         }
 
         .timer-display {
@@ -310,7 +309,7 @@
                 <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Exporta o importa únicamente los ejercicios y días de entrenamiento (el historial no se altera).</p>
                 <button class="btn btn-secondary" style="margin-bottom: 8px;" onclick="exportWorkoutsOnly()">Exportar Entrenos</button>
                 <label class="btn btn-secondary" style="display:block; text-align:center; cursor:pointer;">
-                    Importar Entrenos <input type="file" id="importWorkoutsFile" style="display:none" onchange="importWorkoutsOnly(event)">
+                    Importar Entrenos <input type="file" id="importWorkoutsFile" accept=".json" style="display:none" onchange="importWorkoutsOnly(event)">
                 </label>
             </div>
 
@@ -319,7 +318,7 @@
                 <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Exporta o restaura únicamente el historial de entrenamientos.</p>
                 <button class="btn btn-secondary" style="margin-bottom: 8px;" onclick="exportHistoryOnly()">Exportar Historial</button>
                 <label class="btn btn-secondary" style="display:block; text-align:center; cursor:pointer;">
-                    Restaurar Historial <input type="file" id="importHistoryFile" style="display:none" onchange="importHistoryOnly(event)">
+                    Restaurar Historial <input type="file" id="importHistoryFile" accept=".json" style="display:none" onchange="importHistoryOnly(event)">
                 </label>
             </div>
 
@@ -328,7 +327,7 @@
                 <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Exporta o restaura tanto los entrenamientos como todo el historial de sesiones.</p>
                 <button class="btn btn-secondary" style="margin-bottom: 8px;" onclick="exportFullBackup()">Crear Copia Completa</button>
                 <label class="btn btn-secondary" style="display:block; text-align:center; cursor:pointer;">
-                    Restaurar Copia Completa <input type="file" id="importFullFile" style="display:none" onchange="importFullBackup(event)">
+                    Restaurar Copia Completa <input type="file" id="importFullFile" accept=".json" style="display:none" onchange="importFullBackup(event)">
                 </label>
             </div>
         </section>
@@ -393,16 +392,19 @@
             selector.innerHTML = '';
             
             for(let i = 1; i <= 4; i++) {
+                if (!workouts[i]) continue;
                 selector.innerHTML += `
                     <button class="day-btn ${currentDay === i ? 'active' : ''}" onclick="selectDay(${i})">
                         <strong>DÍA ${i}</strong>
-                        <span>${workouts[i].subtitle}</span>
+                        <span>${workouts[i].subtitle || ''}</span>
                     </button>
                 `;
             }
 
             const container = document.getElementById('exerciseContainer');
-            container.innerHTML = `<h3>${workouts[currentDay].title} (${workouts[currentDay].subtitle})</h3>`;
+            if (!workouts[currentDay]) currentDay = 1;
+            
+            container.innerHTML = `<h3>${workouts[currentDay].title} (${workouts[currentDay].subtitle || ''})</h3>`;
             
             workouts[currentDay].exercises.forEach((ex, exIdx) => {
                 if(!workoutLogs[exIdx]) workoutLogs[exIdx] = [];
@@ -448,7 +450,6 @@
             renderEntreno();
         }
 
-        // TIMER ROBUSTO CON HORA ABSOLUTA DEL SISTEMA
         function startTimer(seconds) {
             stopTimer();
             const box = document.getElementById('floatingTimer');
@@ -462,7 +463,7 @@
                 if(timeLeft < 0) {
                     stopTimer();
                     display.textContent = "¡TIEMPO!";
-                    box.style.display = 'block'; // Mantiene visible el aviso
+                    box.style.display = 'block';
                     return;
                 }
                 let m = Math.floor(timeLeft / 60);
@@ -471,7 +472,7 @@
             }
 
             update();
-            timerInterval = setInterval(update, 200); // Intervalo más frecuente para evitar desfaces al desbloquear pantalla
+            timerInterval = setInterval(update, 200);
         }
 
         function stopTimer() {
@@ -567,12 +568,11 @@
         }
 
         function saveSettings() {
-            settings.inicio = document.getElementById('rutinaInicio').value;
-            settings.fin = document.getElementById('rutinaFin').value;
+            settings.inicio = document.getElementById('rutinaInicio', '').value;
+            settings.fin = document.getElementById('rutinaFin', '').value;
             localStorage.setItem('gym_settings', JSON.stringify(settings));
         }
 
-        // SISTEMA DE DESCARGA BLOB MEJORADO PARA COPIAS DE SEGURIDAD
         function downloadFile(content, filename, contentType) {
             const blob = new Blob([content], { type: contentType });
             const url = URL.createObjectURL(blob);
@@ -599,17 +599,18 @@
             reader.onload = function(e) {
                 try {
                     const imported = JSON.parse(e.target.result);
-                    if(imported && imported[1]) {
+                    if(imported && typeof imported === 'object') {
                         workouts = imported;
                         localStorage.setItem('gym_workouts', JSON.stringify(workouts));
                         renderEntreno();
-                        alert("Entrenos copiados y restaurados con éxito (el historial no se ha modificado).");
+                        alert("Entrenos copiados y restaurados con éxito.");
                     } else {
                         alert("El archivo no tiene el formato de entrenos correcto.");
                     }
                 } catch(err) {
                     alert("Error al leer el archivo.");
                 }
+                event.target.value = ''; // Permite volver a seleccionar el mismo archivo si es necesario
             };
             reader.readAsText(file);
         }
@@ -629,9 +630,7 @@
                     if(Array.isArray(imported)) {
                         historyData = imported;
                         localStorage.setItem('gym_history', JSON.stringify(historyData));
-                        if(document.getElementById('historial').classList.contains('active')) {
-                            renderHistory();
-                        }
+                        renderHistory();
                         alert("Historial restaurado con éxito.");
                     } else {
                         alert("El archivo no tiene el formato de historial correcto.");
@@ -639,6 +638,7 @@
                 } catch(err) {
                     alert("Error al leer el archivo.");
                 }
+                event.target.value = '';
             };
             reader.readAsText(file);
         }
@@ -670,10 +670,12 @@
                         loadSettings();
                     }
                     renderEntreno();
+                    renderHistory();
                     alert("Copia de seguridad completa restaurada correctamente.");
                 } catch(err) {
                     alert("El archivo de copia de seguridad no es válido.");
                 }
+                event.target.value = '';
             };
             reader.readAsText(file);
         }
