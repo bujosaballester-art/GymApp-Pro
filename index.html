@@ -364,10 +364,10 @@
 
     <script>
         const defaultWorkouts = {
-            1: { title: "DÍA 1: EMPUJE", subtitle: "PECHO, HOMBRO, TRICEPS", exercises: [{ name: "Press de Banca", type: "Compuesto", sets: 4, reps: "10", rest: 90 }] },
-            2: { title: "DÍA 2: TRACCION", subtitle: "ESPALDA, HOMBRO, BICEPS", exercises: [{ name: "Dominadas", type: "Compuesto", sets: 3, reps: "8", rest: 90 }] },
-            3: { title: "DÍA 3: PIERNAS", subtitle: "PIERNAS", exercises: [{ name: "Sentadilla Libre", type: "Compuesto", sets: 4, reps: "10", rest: 120 }] },
-            4: { title: "DÍA 4: BRAZOS", subtitle: "BICEPS, TRICEPS, HOMBRO", exercises: [{ name: "Curl Bíceps", type: "Aislado", sets: 3, reps: "12", rest: 60 }] }
+            1: { title: "DÍA 1: EMPUJE", subtitle: "PECHO, HOMBRO, TRICEPS", exercises: [{ name: "Press de Banca", type: "Compuesto", sets: 4, reps: "8-12", rest: 90 }] },
+            2: { title: "DÍA 2: TRACCION", subtitle: "ESPALDA, HOMBRO, BICEPS", exercises: [{ name: "Dominadas", type: "Compuesto", sets: 3, reps: "8-12", rest: 90 }] },
+            3: { title: "DÍA 3: PIERNAS", subtitle: "PIERNAS", exercises: [{ name: "Sentadilla Libre", type: "Compuesto", sets: 4, reps: "8-12", rest: 120 }] },
+            4: { title: "DÍA 4: BRAZOS", subtitle: "BICEPS, TRICEPS, HOMBRO", exercises: [{ name: "Curl Bíceps", type: "Aislado", sets: 3, reps: "10-15", rest: 60 }] }
         };
 
         let workouts = JSON.parse(localStorage.getItem('gym_workouts')) || defaultWorkouts;
@@ -411,7 +411,13 @@
                 
                 let setsHtml = '';
                 for(let s = 0; s < ex.sets; s++) {
-                    if(!workoutLogs[exIdx][s]) workoutLogs[exIdx][s] = { weight: '', reps: ex.reps };
+                    // CORRECCIÓN: Asegura que el valor por defecto sea el rango completo si está vacío
+                    if(!workoutLogs[exIdx][s]) {
+                        workoutLogs[exIdx][s] = { weight: '', reps: ex.reps };
+                    } else if (workoutLogs[exIdx][s].reps === undefined || workoutLogs[exIdx][s].reps === '') {
+                        workoutLogs[exIdx][s].reps = ex.reps;
+                    }
+                    
                     let log = workoutLogs[exIdx][s];
                     
                     setsHtml += `
@@ -568,8 +574,8 @@
         }
 
         function saveSettings() {
-            settings.inicio = document.getElementById('rutinaInicio', '').value;
-            settings.fin = document.getElementById('rutinaFin', '').value;
+            settings.inicio = document.getElementById('rutinaInicio').value;
+            settings.fin = document.getElementById('rutinaFin').value;
             localStorage.setItem('gym_settings', JSON.stringify(settings));
         }
 
@@ -610,7 +616,7 @@
                 } catch(err) {
                     alert("Error al leer el archivo.");
                 }
-                event.target.value = ''; // Permite volver a seleccionar el mismo archivo si es necesario
+                event.target.value = '';
             };
             reader.readAsText(file);
         }
@@ -724,7 +730,7 @@
 
         function addExerciseToCurrentDay() {
             syncEditFormToMemory();
-            workouts[currentDay].exercises.push({ name: "Nuevo Ejercicio", type: "Compuesto", sets: 3, reps: "10", rest: 60 });
+            workouts[currentDay].exercises.push({ name: "Nuevo Ejercicio", type: "Compuesto", sets: 3, reps: "8-12", rest: 60 });
             renderEditExercises();
         }
 
